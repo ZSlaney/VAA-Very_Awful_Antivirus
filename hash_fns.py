@@ -9,9 +9,9 @@ def check_password(password, salt, hash):
         return False
     
 def gen_hash(password, salt):
-    hashed_password = hashlib.pbkdf2_hmac('sha512', password.encode('utf-8'), salt, 100000)
-    return hashed_password
+    hashed_password = hashlib.sha3_512(password.encode('utf-8') + salt.encode('utf-8'))
+    return hashed_password.hexdigest()
 
 def gen_salt():
     salt = os.urandom(32)
-    return salt
+    return str(int.from_bytes(salt, byteorder='big', signed=False))
