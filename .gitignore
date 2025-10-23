@@ -1,1 +1,6 @@
-__pycache__/hash_fns.cpython-313.pyc
+__pycache__/
+cli_menus/__pycache__/
+*.pyc
+.env
+.vscode/
+.DS_Store
