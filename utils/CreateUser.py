@@ -27,5 +27,3 @@ def newUser(Username, Password):
     # Close the connection
     users.commit()
     users.close()
-
-newUser("Test1", "Test1")

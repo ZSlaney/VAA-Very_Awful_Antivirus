@@ -18,3 +18,128 @@ def login(usrname, password):
     # Close the connection
     users.close()
     return False
+
+
+def add_to_quarantine(user, path, filename):
+    db = sqlite3.connect('./databases/quar.db')
+    cursor = db.cursor()
+
+    # Create a table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS quarantine_list (
+            id INTEGER PRIMARY KEY,
+            user TEXT,
+            path TEXT,
+            filename TEXT
+        )
+    ''')
+
+    cursor.execute('''INSERT INTO quarantine_list VALUES ((?), (?), (?))''', (user, path, filename))
+    db.commit()
+    db.close()
+
+def read_quarantine(user):
+    db = sqlite3.connect('./databases/quar.db')
+    cursor = db.cursor()
+
+    # Create a table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS quarantine_list (
+            id INTEGER PRIMARY KEY,
+            user TEXT,
+            path TEXT,
+            filename TEXT
+        )
+    ''')
+
+    cursor.execute('''SELECT * FROM quarantine_list WHERE user=(?)''', (user,))
+    actions = cursor.fetchall()
+    db.close()
+    return actions
+
+def add_to_scans(user, path, malware_count, file_count):
+    db = sqlite3.connect('./databases/scans.db')
+    cursor = db.cursor()
+
+    # Create a table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS scans (
+            id INTEGER PRIMARY KEY,
+            user TEXT,
+            path TEXT,
+            malware_files INTEGER,
+            total_files INTEGER
+        )
+    ''')
+
+    cursor.execute('''INSERT INTO scans VALUES ((?), (?), (?), (?), (?))''', (user, path, malware_count, file_count))
+    db.close()
+
+def read_scans(user):
+    db = sqlite3.connect('./databases/scans.db')
+    cursor = db.cursor()
+
+    # Create a table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS scans (
+            id INTEGER PRIMARY KEY,
+            user TEXT,
+            path TEXT,
+            malware_files INTEGER,
+            total_files INTEGER
+        )
+    ''')
+    cursor.execute('''SELECT * FROM scans WHERE user=(?)''', (user,))
+
+
+#------------------------------------------------
+# Debug Functions - Not to be used for production
+#------------------------------------------------
+def dump_users_db():
+    users = sqlite3.connect('./databases/users.db')
+    u_cursor = users.cursor()
+
+    u_cursor.execute('''SELECT * FROM users''')
+    res = u_cursor.fetchall()
+    users.close()
+    for row in res:
+        print(row)
+
+def dump_quar_db():
+    db = sqlite3.connect('./databases/quar.db')
+    cursor = db.cursor()
+    # Create a table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS quarantine_list (
+            id INTEGER PRIMARY KEY,
+            user TEXT,
+            path TEXT,
+            filename TEXT
+        )
+    ''')
+
+    cursor.execute('''SELECT * FROM quarantine_list''')
+    res = cursor.fetchall()
+    db.close()
+    for row in res:
+        print(row)
+
+def dump_scans_db():
+    db = sqlite3.connect('./databases/scans.db')
+    cursor = db.cursor()
+    # Create a table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS scans (
+            id INTEGER PRIMARY KEY,
+            user TEXT,
+            path TEXT,
+            malware_files INTEGER,
+            total_files INTEGER
+        )
+    ''')
+
+    cursor.execute('''SELECT * FROM scans''')
+    res = cursor.fetchall()
+    db.close()
+    for row in res:
+        print(row)
