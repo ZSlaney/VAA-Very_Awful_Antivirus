@@ -1,9 +1,22 @@
-import joblib
-from sklearn.metrics import confusion_matrix, classification_report, roc_curve, auc
-from sklearn.datasets import load_breast_cancer
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
-from sklearn.ensemble import RandomForestClassifier
 import pandas as pd
+from Random_Forest import rand_forest
+from DBSCAN import dbs
+from Logistic_Regression import log_reg
+from Convert_PE import process_pe_file
 
-rf = joblib.load('Model/random_forest.joblib')
+
+def logistic(file_path):
+    pe = process_pe_file(file_path)
+    log_reg(pe)
+    print(pe)
+
+def random_forest(file_path):
+    pe = process_pe_file(file_path)
+    rand_forest(pe)
+
+def cluster(file_path):
+    pe = process_pe_file(file_path)
+    dbs(pe)
+
+
+logistic("/home/zach-slaney/Documents/git/VAA-Very_Awful_Antivirus/VSCodeUserSetup-x64-1.105.1.exe")
