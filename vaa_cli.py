@@ -56,7 +56,8 @@ class FileManagerCLI(cmd.Cmd):
 
 def doConnect(host):
     # Placeholder for actual connection logic
-    print(f"Connected to {host}")
+    print(f"Connecting to VAA server at {host}...")
+    return True
 
 if __name__ == '__main__':
     FileManagerCLI().cmdloop()

@@ -10,8 +10,8 @@ app = FastAPI()
 # Serve static files first
 app.mount("/", StaticFiles(directory=frontenddir, html=True), name="frontend")
 
-# Fallback route for React Router
-@app.get("/{full_path:path}")
-async def serve_react_app(full_path: str):
+# Fallback route
+@app.get("/")
+async def serve_react_app():
     index_path = os.path.join(frontenddir, "index.html")
     return FileResponse(index_path)

@@ -29,3 +29,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+Model/preprocessing/pe_features.csv
+Model/preprocessing/ACCICONS.EXE
+Model/randomforestv1/random_forest.joblib
