@@ -1,8 +1,10 @@
 #Main program for VAA - VeryAwfulAntivirus no cli but houses a fastapi webserver and imports db functions to support
-from utils import hash_fns
-from utils import SQL_handler
-from utils import CreateUser
+
 import socket
+import uvicorn # ASGI server for FastAPI
+import os
+from backend import app
+
 
 class VaaGovernor:
     def __init__(self):
@@ -17,3 +19,15 @@ class VaaGovernor:
             clientsocket, address = self.serversocket.accept()
             print(f"Connection from {address} has been established!")
             # Here you would handle authentication and further communication
+
+    def host_page(self):
+        uvicorn.run(app, host="localhost", port=8000)
+
+if __name__ == "__main__":
+    governor = VaaGovernor()
+    # Start the FastAPI server in a separate thread or process if needed
+    import threading
+    api_thread = threading.Thread(target=governor.host_page)
+    api_thread.start()
+    # Start the main loop to handle client connections
+    governor.main_loop()
