@@ -46,4 +46,12 @@ class ModelHandler:
                     spec.loader.exec_module(handler_module)
                     self.handlers[model_name] = handler_module
 
-   
+    def load_handlers(self, folder):
+        # Logic to load preprocessing handlers from the specified folder
+        for root, dirs, files in os.walk(folder):
+            if 'handler.py' in files:
+                handler_path = os.path.join(root, 'handler.py')
+                spec = importlib.util.spec_from_file_location(f"{root}_handler", handler_path)
+                handler_module = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(handler_module)
+                self.handlers[os.path.basename(root)] = handler_module

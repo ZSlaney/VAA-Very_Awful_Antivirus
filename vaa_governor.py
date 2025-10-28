@@ -10,8 +10,9 @@ import threading
 
 class VaaGovernor:
     def __init__(self, logger):
-        self.clients = [] # List to keep track of authenticated clients (sessionkey, name, permissions)
+        self.clients = ["Client"] # List to keep track of authenticated clients (sessionkey, name, permissions)
         self.logger = logger
+        self.clients_lock = threading.Lock()  # Lock for thread-safe access to clients list
 
     def start(self):
         self.api_thread = threading.Thread(target=self.host_page)
@@ -22,7 +23,10 @@ class VaaGovernor:
         self.init_clisocket()
         self.main_loop()
 
-   
+    def list_clients(self):
+        """Return a list of connected clients."""
+        with self.clients_lock:
+            return self.clients
 
     def init_clisocket(self):
         self.serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
