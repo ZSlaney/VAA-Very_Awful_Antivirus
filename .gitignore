@@ -32,3 +32,6 @@ dist-ssr
 Model/preprocessing/pe_features.csv
 Model/preprocessing/ACCICONS.EXE
 Model/randomforestv1/random_forest.joblib
+VSCodeUserSetup-x64-1.105.1.exe
+Model/dbscanv1/cluster.joblib
+Model/logisticregressionv1/log_reg.joblib
