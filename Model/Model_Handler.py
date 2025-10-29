@@ -6,13 +6,10 @@ class ModelInterface:
         self.model_version = model_version
         self.model_type = model_type
         self.handler_name = handler_name
+        self.model = None
 
     def load_model(self):
         # Logic to load the model based on type and version
-        pass
-
-    def preprocess_input(self, input_data):
-        # Logic to preprocess input data using the specified handler
         pass
 
     def predict(self, processed_data):
