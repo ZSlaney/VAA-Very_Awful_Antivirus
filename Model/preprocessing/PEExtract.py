@@ -141,6 +141,7 @@ class Processor:
                 for field in SECTION_FIELDS:
                     sec_info[f"{name.replace('.', '')}_{field}"] = getattr(section, field, 0)
                     self.AddSectionAttributes(f"{name.replace('.', '')}_{field}")
+
             return sec_info
         except AttributeError:
             print(f"No sections found")
@@ -176,17 +177,22 @@ class Processor:
             df = pd.concat([df, missing_df], axis=1)
 
         # Delete any extra DLL columns not in trained DLLs
-        valid_columns = set(trained_dlls + self.foundheaderattributes + self.foundsectionattributes + ["SHA256"])
+        valid_columns = set(trained_dlls + PE_HeaderImportantFeatures + PE_SectionImportantFeatures + ["SHA256"])
         extra_columns = [col for col in df.columns if col not in valid_columns]
         if extra_columns:
             df = df.drop(columns=extra_columns)
 
+        missing_sections = [name for name in PE_SectionImportantFeatures if name not in df.columns]
+        if missing_sections:
+            missing_sect = pd.DataFrame(0, index=df.index, columns=missing_sections)
+            df = pd.concat([df, missing_sect], axis=1)
         return df
     
     def execute(self,path):
         self.process_pe_file(path)
         df = self.dict_to_pandas()
         df = self.ensure_columns(df)
+        df.to_csv("pe_features.csv", index=False)
         return df
 
 if __name__ == "__main__":

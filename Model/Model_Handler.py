@@ -1,7 +1,8 @@
 import importlib.util
+from randomforestv1 import handler
 
 class ModelInterface:
-    def __init__(self, model_name, model_version, model_type, handler_name):
+    def __init__(self, model_name="", model_version="", model_type="", handler_name=""):
         self.model_name = model_name
         self.model_version = model_version
         self.model_type = model_type
@@ -18,37 +19,15 @@ class ModelInterface:
 
 class ModelHandler:
     def __init__(self):
+        from preprocessing import PEExtract
         self.models = {}
-        self.handlers = {}
+        self.handlers = {"PEExtract": PEExtract.Processor()}
 
-    def load_models(self, folder):
-        #walk folders exluding preprocessing and fetch meanifest.json and handler.py
-        import os
-        import json
-        for root, dirs, files in os.walk(folder):
-            if 'manifest.json' in files and 'handler.py' in files:
-                manifest_path = os.path.join(root, 'manifest.json')
-                with open(manifest_path, 'r') as f:
-                    manifest = json.load(f)
-                    model_name = manifest.get('name')
-                    model_version = manifest.get('version')
-                    model_type = manifest.get('type')
-                    handler_name = manifest.get('handler')
-                    model_interface = ModelInterface(model_name, model_version, model_type, handler_name)
-                    self.models[model_name] = model_interface
-                    # Dynamically import handler module
-                    handler_module_path = os.path.join(root, 'handler.py')
-                    spec = importlib.util.spec_from_file_location(f"{model_name}_handler", handler_module_path)
-                    handler_module = importlib.util.module_from_spec(spec)
-                    spec.loader.exec_module(handler_module)
-                    self.handlers[model_name] = handler_module
-
-    def load_handlers(self, folder):
-        # Logic to load preprocessing handlers from the specified folder
-        for root, dirs, files in os.walk(folder):
-            if 'handler.py' in files:
-                handler_path = os.path.join(root, 'handler.py')
-                spec = importlib.util.spec_from_file_location(f"{root}_handler", handler_path)
-                handler_module = importlib.util.module_from_spec(spec)
-                spec.loader.exec_module(handler_module)
-                self.handlers[os.path.basename(root)] = handler_module
+    
+if __name__ == "__main__":
+    test = handler.Model()
+    Masterclass = ModelHandler()
+    file="/home/zach-slaney/Downloads/VSCodeUserSetup-x64-1.105.1.exe"
+    handler = test.handler_name
+    handlers = Masterclass.handlers
+    print(test.predict(handlers[handler].execute(path = file)))

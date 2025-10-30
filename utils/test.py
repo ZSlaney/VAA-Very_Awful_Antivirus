@@ -1,5 +1,6 @@
 import SQL_handler as sql
 from CreateUser import newUser
+import os
 
 print("Users table:\n")
 sql.dump_users_db()
