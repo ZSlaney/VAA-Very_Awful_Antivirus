@@ -18,7 +18,6 @@ class Model(ModelInterface):
 
     def predict(self, processed_data: pd.DataFrame):
         # Make predictions using the loaded Random Forest model
-        print(processed_data.head())
         processed_data = processed_data.drop(columns="SHA256")
         scaler = StandardScaler()
         processed_data = scaler.fit_transform(processed_data)
