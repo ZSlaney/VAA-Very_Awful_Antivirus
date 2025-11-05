@@ -20,7 +20,6 @@ class Model(ModelInterface):
 
     def predict(self, processed_data: pd.DataFrame):
         processed_data = processed_data.drop("SHA256")
-        processed_data
         # Make predictions using the loaded Random Forest model
         predictions = self.model.fit_predict(processed_data)
         return predictions
