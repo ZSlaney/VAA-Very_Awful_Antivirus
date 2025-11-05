@@ -32,3 +32,4 @@ dist-ssr
 Model/preprocessing/pe_features.csv
 #models
 *.joblib
+Model/preprocessing/ACCICONS.EXE

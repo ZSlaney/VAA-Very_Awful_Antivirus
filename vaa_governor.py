@@ -7,15 +7,23 @@ from backend import app
 import threading
 from utils import SQL_handler as sql
 #from pystray import Icon as icon, Menu as menu, MenuItem as item
- 
+import ssl
+CERTPATH = os.path.abspath("./cert")
 
 class VaaGovernor:
     def __init__(self, logger):
-        self.clients = ["Client"] # List to keep track of authenticated clients (sessionkey, name, permissions)
+        self.clients = [] # List to keep track of authenticated clients (sessionkey, name, permissions)
         self.logger = logger
-        self.clients_lock = threading.Lock()  # Lock for thread-safe access to clients list
+        self.sslContext = None
+        self.locks = {
+            "auth": threading.Lock(),
+            "scan": threading.Lock(),
+            "db": threading.Lock()
+        }
 
     def start(self):
+        self.sslContext = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+        self.sslContext.load_cert_chain(CERTPATH + "/cert.pem", CERTPATH + "/key.pem")
         self.api_thread = threading.Thread(target=self.host_page)
         #self.traythread = threading.Thread(target=self.init_tray)
         #self.traythread.start()
@@ -24,10 +32,6 @@ class VaaGovernor:
         self.init_clisocket()
         self.main_loop()
 
-    def list_clients(self):
-        """Return a list of connected clients."""
-        with self.clients_lock:
-            return self.clients
 
     def init_clisocket(self):
         self.serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -40,29 +44,33 @@ class VaaGovernor:
             clientsocket, address = self.serversocket.accept()
             self.logger.info(f"Connection from {address} has been established!")
 
+    def list_clients(self):
+        return self.clients
+
     def host_page(self):
-        self.logger.info("Starting Web server on http://localhost:8000")
-        uvicorn.run(app, host="localhost", port=8000)
+        self.logger.info("Starting Web server on https://localhost:8000")
+        uvicorn.run(app, host="localhost", port=8000, ssl_certfile=CERTPATH + "/cert.pem", ssl_keyfile=CERTPATH + "/key.pem")
     
     def login(self, username: str, password: str):
-        self.logger.info("Login request recieved from " + username)
-        res = sql.login(username, password)
+        with self.locks["auth"]:
+            self.logger.info("Login request recieved from " + username)
+            res = sql.login(username, password)
 
-        if res[0] == True:
-            #Valid user
-            valid_key = False
-            while valid_key == False:
-                candidate_key = os.urandom(32)
-                if self.clients.__contains__(candidate_key) == False:
-                    #Key is not a duplicate
-                    key =  candidate_key
-                    self.clients.append([key, username, res[1]])  
-        else:
-            #Invalid user
-            key = None
+            if res[0] == True:
+                #Valid user
+                valid_key = False
+                while valid_key == False:
+                    candidate_key = os.urandom(32)
+                    if self.clients.__contains__(candidate_key) == False:
+                        #Key is not a duplicate
+                        key =  candidate_key
+                        self.clients.append([key, username, res[1]])  
+            else:
+                #Invalid user
+                key = None
 
-        # True/False, permission level, key
-        return [res[0], res[1], key]
+            # True/False, permission level, key
+            return [res[0], res[1], key]
     
     def verify_session(self, key, perm_level):
         clients = self.list_clients()
