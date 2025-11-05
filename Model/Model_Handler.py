@@ -2,6 +2,9 @@ import importlib.util
 from randomforestv1 import handler as rf
 from logisticregressionv1 import handler as lr
 from preprocessing import PEExtract
+
+
+
 class ModelInterface:
     def __init__(self, model_name="", model_version="", model_type="", handler_name=""):
         self.model_name = model_name
@@ -21,13 +24,17 @@ class ModelInterface:
 class ModelHandler:
     def __init__(self):
         
-        self.models = []
+        self.models = ["RandomForestV1", "LogisticRegressionV1"]
         self.handlers = {"PEExtract": PEExtract.Processor()}
 
         self.jobs = []  # List to keep track of model jobs
         #{"id", "filepath", "model_name", "status", "result", model_instance}
         #
         #
+   
+
+    def get_jobs(self):
+        return self.jobs
 
     def runmodel(self, jobId):
 

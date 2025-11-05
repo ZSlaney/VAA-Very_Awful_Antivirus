@@ -126,7 +126,7 @@ export default function FilesExample({setPage}: {setPage: React.Dispatch<React.S
         ]}
       >
         <Layout.Header>
-          <Header />
+          <Header setPage={setPage} />
         </Layout.Header>
         <Layout.SideNav>
           <SideDrawer />

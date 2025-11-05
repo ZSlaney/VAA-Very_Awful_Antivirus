@@ -6,12 +6,12 @@ import os
 from backend import app
 import threading
 from utils import SQL_handler as sql
-from Model import Model_Handler as model
+#from Model import Model_Handler
 #from pystray import Icon as icon, Menu as menu, MenuItem as item
 import ssl
 CERTPATH = os.path.abspath("./cert")
 
-scanner_model = model()
+
 
 class VaaGovernor:
     def __init__(self, logger):
@@ -23,7 +23,7 @@ class VaaGovernor:
             "scan": threading.Lock(),
             "db": threading.Lock()
         }
-        self.scanner = scanner_model
+        #self.scanner = Model_Handler.ModelHandler()
 
     def start(self):
         self.sslContext = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
@@ -70,11 +70,13 @@ class VaaGovernor:
                         key =  candidate_key
                         valid_key = True
                         self.clients.append([key, username, res[1]])  
+                        valid_key = True
             else:
                 #Invalid user
                 key = None
 
             # True/False, permission level, key
+            
             return [res[0], res[1], key]
     
     def verify_session(self, key, perm_level):
@@ -95,7 +97,7 @@ class VaaGovernor:
         if self.verify_session(key, perm_level) == False:
             return 
         #valid session
-        job_id = self.scanner.add_job(filepath=file_path, model_name="RandomForestV1")
+        #job_id = self.scanner.add_job(filepath=file_path, model_name="RandomForestV1")
 
 
         

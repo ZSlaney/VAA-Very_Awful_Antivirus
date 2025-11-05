@@ -15,20 +15,35 @@ import Typography from '@mui/joy/Typography';
 import Stack from '@mui/joy/Stack';
 import Logo from '../../public/VA-AV.png';
 
+import { issueAuth } from '../context/utils';
+
 
 interface FormElements extends HTMLFormControlsCollection {
   email: HTMLInputElement;
   password: HTMLInputElement;
   persistent: HTMLInputElement;
 }
-interface SignInFormElement extends HTMLFormElement {
-  readonly elements: FormElements;
-}
+
 
 
 const customTheme = extendTheme({});
 
-export default function JoySignInSideTemplate({setPage}: {setPage: React.Dispatch<React.SetStateAction<'login' | 'dashboard' | 'about'>>}) {
+export default function Login({ setPage }: { setPage: React.Dispatch<React.SetStateAction<'login' | 'dashboard' | 'about'>> }) {
+  const [loading, setLoading] = React.useState(false);
+
+  const handleLogin = async (username: string, password: string) => {
+    try {
+      setLoading(true);
+      const sessionKey = await issueAuth(username, password);
+      if (sessionKey) {
+        setPage('dashboard');
+      }
+    } catch (error) {
+      console.error('Login failed:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <CssVarsProvider theme={customTheme} disableTransitionOnChange>
       <CssBaseline />
@@ -75,9 +90,9 @@ export default function JoySignInSideTemplate({setPage}: {setPage: React.Dispatc
               </IconButton>
               <Typography level="title-lg">Very Awful AntiVirus</Typography>
             </Box>
-            
+
           </Box>
-          
+
           <Box
             component="main"
             sx={{
@@ -106,46 +121,27 @@ export default function JoySignInSideTemplate({setPage}: {setPage: React.Dispatc
                 <Typography component="h1" level="h3">
                   Sign in
                 </Typography>
-               <Divider />
+                <Divider />
               </Stack>
-             
+
             </Stack>
-            
+
             <Stack sx={{ gap: 4, mt: 2 }}>
-              <form
-                onSubmit={(event: React.FormEvent<SignInFormElement>) => {
-                  event.preventDefault();
-                  const formElements = event.currentTarget.elements;
-                  const data = {
-                    email: formElements.email.value,
-                    password: formElements.password.value,
-                    persistent: formElements.persistent.checked,
-                  };
-                  alert(JSON.stringify(data, null, 2));
-                }}
-              >
-                <FormControl required>
-                  <FormLabel>Username</FormLabel>
-                  <Input type="email" name="email" />
-                </FormControl>
-                <FormControl required>
-                  <FormLabel>Password</FormLabel>
-                  <Input type="password" name="password" />
-                </FormControl>
+              <form onSubmit={(event) => {
+                event.preventDefault();
+                const formData = new FormData(event.currentTarget);
+                const formJson = Object.fromEntries((formData as any).entries());
+                console.log("Form submitted with data:", formJson);
+                const username = formJson.username as string;
+                const password = formJson.password as string;
+                handleLogin(username, password);
+              }} >
+                <FormLabel>Username</FormLabel>
+                <Input type="username" name="username" />
+                <FormLabel>Password</FormLabel>
+                <Input type="password" name="password" />
                 <Stack sx={{ gap: 4, mt: 2 }}>
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                    }}
-                  >
-                    <Checkbox size="sm" label="Remember me" name="persistent" />
-                    <Link level="title-sm" href="#replace-with-a-link">
-                      Forgot your password?
-                    </Link>
-                  </Box>
-                  <Button type="submit" fullWidth onClick={() => setPage('dashboard')}>
+                  <Button type="submit" fullWidth loading={loading}>
                     Sign in
                   </Button>
                 </Stack>
@@ -159,7 +155,7 @@ export default function JoySignInSideTemplate({setPage}: {setPage: React.Dispatc
           </Box>
         </Box>
       </Box>
-      
-    </CssVarsProvider>
+
+    </CssVarsProvider >
   );
 }

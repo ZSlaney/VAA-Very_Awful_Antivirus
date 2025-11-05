@@ -3,6 +3,7 @@ from fastapi.responses import FileResponse
 from fastapi import FastAPI, Depends
 from fastapi.responses import JSONResponse
 import os
+from pydantic import BaseModel
 
 frontenddir = os.path.join(os.path.dirname(__file__), "frontend/dist")
 
@@ -27,10 +28,14 @@ async def scan_file(file_path: str, governor=Depends(get_governor)):
     scan_result = {"file_path": file_path, "threat_found": False}
     return JSONResponse(content=scan_result)
 
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
 @app.post("/api/auth")
-async def login(username: str, password: str, governor=Depends(get_governor)):
+async def login(request: LoginRequest, governor=Depends(get_governor)):
     #Pass u + p to governor
-    res = governor.login(username, password)
+    res = governor.login(request.username, request.password)
     #res[0] - T/F
     #res[1] - Perm level
     #res[2] - Key

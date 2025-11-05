@@ -25,6 +25,7 @@ import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 
 import Navigation from './Navigation';
+import { clearAuth } from '../context/utils';
 
 function ColorSchemeToggle() {
   const { mode, setMode } = useColorScheme();
@@ -57,8 +58,14 @@ function ColorSchemeToggle() {
   );
 }
 
-export default function Header() {
+export default function Header({setPage}: {setPage: React.Dispatch<React.SetStateAction<'login' | 'dashboard' | 'about'>>}) {
   const [open, setOpen] = React.useState(false);
+  const OnLogout = () => {
+    // Clear session key and redirect to login page
+    clearAuth();
+    setPage('login');
+  };
+
   return (
     <Box sx={{ display: 'flex', flexGrow: 1, justifyContent: 'space-between' }}>
       <Stack
