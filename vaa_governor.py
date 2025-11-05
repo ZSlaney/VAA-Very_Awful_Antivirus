@@ -82,7 +82,6 @@ class VaaGovernor:
     def verify_session(self, key, perm_level):
         clients = self.list_clients()
         for client in clients:
-            print(client)
             if key == client[0]:
                 #valid user
                 if perm_level == client[2]:
@@ -93,6 +92,14 @@ class VaaGovernor:
         
         #No session  or altered data      
         return False
+
+    def get_username(self, key):
+        clients = self.list_clients()
+        for client in clients:
+            if key == client[0]:
+                return client[1]
+    
+        return ""
     
     def scan(self, file_path, key, perm_level):
         if self.verify_session(key, perm_level) == False:
@@ -100,7 +107,25 @@ class VaaGovernor:
         #valid session
         job_id = self.scanner.add_job(filepath=file_path, model_name="RandomForestV1")
         result = self.scanner.runmodel(jobId=job_id)
+        
+        if result["Confidence"] == "Unknown":
+            conf = -1
+        else:
+            conf = result["Confidence"]
+
+        sql.add_to_scans(user=self.get_username(key=key), path=file_path, result=bool(result["Classification"]), confidence=conf)
         return result
+    
+    def query_scan_db(self, username, filter, key, perm_level):
+        if self.verify_session(key, perm_level) == False:
+            return False
+        #valid session
+        res = sql.read_scans(username)
+        res = reversed(res)
+        print(res)
+        #do filter stuff here
+
+        return res
 
 
         

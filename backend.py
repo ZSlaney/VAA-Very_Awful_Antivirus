@@ -21,21 +21,53 @@ def get_governor():
 async def list_clients(governor=Depends(get_governor)):
     return {"clients": governor.list_clients()}
 
+class ScanDatabase(BaseModel):
+    username: str
+    filter: dict
+    key: int
+    perm_level: int
+
+@app.post("/api/scan/find")
+async def scan_database(request: ScanDatabase, governor=Depends(get_governor)):
+    res = governor.query_scan_db(username=request.username, filter=request.filter, key=request.key, perm_level=request.perm_level)
+
+    if res == False:
+        #bad login or auth
+        return JSONResponse(content={"Auth":"Failed"})
+    
+    full_scan_list = []
+    for scan in res:
+        #0-username
+        #1-path
+        #2-result
+        #3-confidence -- -1 means unknown
+        if scan[3] == -1:
+            conf = "Known"
+        else:
+            conf = scan[3]
+
+        if scan[2] == True:
+            res = "MALWARE"
+        else:
+            res = "BENIGNWARE"
+
+        scan_entry = {"Path":scan[1], "Result":res, "Confidence":conf}
+        full_scan_list.append(scan_entry)
+
+    return JSONResponse(content=full_scan_list)
+
 class ScanRequest(BaseModel):
     file_path: str
     key: int
     perm_level: int
 
-@app.post("/api/scan")
+@app.post("/api/scan/add")
 async def scan_file(request: ScanRequest, governor=Depends(get_governor)):
-    # Placeholder for scanning logic
-    # In a real implementation, you would call the scanning functions here
     
     result = governor.scan(file_path=request.file_path, key=request.key, perm_level=request.perm_level)
     if (result == False):
         #bad login or auth
         return JSONResponse(content={"Auth":"Failed"})
-    #scan_result = {"file_path": file_path, "threat_found": False}
     classif = result["Classification"]
     confid = result["Confidence"]
     scan_result = {"file_path": request.file_path, "thread_found": bool(classif), "confidence_level": confid}

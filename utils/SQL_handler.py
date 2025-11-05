@@ -35,7 +35,7 @@ def add_to_quarantine(user, path, filename):
         )
     ''')
 
-    cursor.execute('''INSERT INTO quarantine_list VALUES ((?), (?), (?))''', (user, path, filename))
+    cursor.execute('''INSERT INTO quarantine_list (user, path, filename) VALUES ((?), (?), (?))''', (user, path, filename))
     db.commit()
     db.close()
 
@@ -58,7 +58,7 @@ def read_quarantine(user):
     db.close()
     return actions
 
-def add_to_scans(user, path, malware_count, file_count):
+def add_to_scans(user, path, result, confidence):
     db = sqlite3.connect('./databases/scans.db')
     cursor = db.cursor()
 
@@ -68,12 +68,12 @@ def add_to_scans(user, path, malware_count, file_count):
             id INTEGER PRIMARY KEY,
             user TEXT,
             path TEXT,
-            malware_files INTEGER,
-            total_files INTEGER
+            result BOOLEAN,
+            confidence INTEGER
         )
     ''')
 
-    cursor.execute('''INSERT INTO scans VALUES ((?), (?), (?), (?), (?))''', (user, path, malware_count, file_count))
+    cursor.execute('''INSERT INTO scans (user, path, result, confidence) VALUES ((?), (?), (?), (?))''', (user, path, result, confidence))
     db.close()
 
 def read_scans(user):
@@ -86,11 +86,15 @@ def read_scans(user):
             id INTEGER PRIMARY KEY,
             user TEXT,
             path TEXT,
-            malware_files INTEGER,
-            total_files INTEGER
+            result BOOLEAN,
+            confidence INTEGER
         )
     ''')
+    
     cursor.execute('''SELECT * FROM scans WHERE user=(?)''', (user,))
+    actions = cursor.fetchall()
+    db.close()
+    return actions
 
 
 #------------------------------------------------
