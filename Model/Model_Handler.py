@@ -1,9 +1,4 @@
 import importlib.util
-from randomforestv1 import handler as rf
-from logisticregressionv1 import handler as lr
-from preprocessing import PEExtract
-
-
 
 class ModelInterface:
     def __init__(self, model_name="", model_version="", model_type="", handler_name=""):

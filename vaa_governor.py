@@ -6,7 +6,7 @@ import os
 from backend import app
 import threading
 from utils import SQL_handler as sql
-#from Model import Model_Handler
+from Model import Model_Handler as model
 #from pystray import Icon as icon, Menu as menu, MenuItem as item
 import ssl
 CERTPATH = os.path.abspath("./cert")
