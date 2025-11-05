@@ -5,6 +5,7 @@ import uvicorn # ASGI server for FastAPI
 import os
 from backend import app
 import threading
+from utils import SQL_handler as sql
 #from pystray import Icon as icon, Menu as menu, MenuItem as item
  
 
@@ -42,6 +43,42 @@ class VaaGovernor:
     def host_page(self):
         self.logger.info("Starting Web server on http://localhost:8000")
         uvicorn.run(app, host="localhost", port=8000)
+    
+    def login(self, username: str, password: str):
+        self.logger.info("Login request recieved from " + username)
+        res = sql.login(username, password)
+
+        if res[0] == True:
+            #Valid user
+            valid_key = False
+            while valid_key == False:
+                candidate_key = os.urandom(32)
+                if self.clients.__contains__(candidate_key) == False:
+                    #Key is not a duplicate
+                    key =  candidate_key
+                    self.clients.append([key, username, res[1]])  
+        else:
+            #Invalid user
+            key = None
+
+        # True/False, permission level, key
+        return [res[0], res[1], key]
+    
+    def verify_session(self, key, perm_level):
+        clients = self.list_clients()
+        for client in clients:
+            if key == client[0]:
+                #valid user
+                if perm_level == client[1]:
+                    #no variation - accept
+                    return True
+                else:
+                    break
+        
+        #No session  or altered data      
+        return False
+        
+
 
 
 

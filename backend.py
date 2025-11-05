@@ -27,5 +27,22 @@ async def scan_file(file_path: str, governor=Depends(get_governor)):
     scan_result = {"file_path": file_path, "threat_found": False}
     return JSONResponse(content=scan_result)
 
+@app.post("/api/auth")
+async def login(username: str, password: str, governor=Depends(get_governor)):
+    #Pass u + p to governor
+    res = governor.login(username, password)
+    #res[0] - T/F
+    #res[1] - Perm level
+    #res[2] - Key
+
+    if res[0] == True:
+        json_res =  {"Key": res[2], "Permission_Level": res[1]}
+    else:
+        json_res = {"Key": "NONE", "Permission_Level": res[1]}
+    
+    return JSONResponse(content=json_res)
+    
+
+
 # Serve static files
 app.mount("/", StaticFiles(directory=frontenddir, html=True), name="frontend")

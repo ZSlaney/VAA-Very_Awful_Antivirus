@@ -1,5 +1,5 @@
 import sqlite3
-from hash_fns import check_password
+from utils import hash_fns as hash
 
 #Return True for valid user or False for invalid
 #It is case senitive
@@ -7,17 +7,18 @@ def login(usrname, password):
     users = sqlite3.connect('./databases/users.db')
     u_cursor = users.cursor()
 
-    u_cursor.execute('''SELECT salt, pword FROM users WHERE username=(?)''', (usrname,))
+    u_cursor.execute('''SELECT salt, pword, perms_level FROM users WHERE username=(?)''', (usrname,))
     rows = u_cursor.fetchall()
     for row in rows:
-        if check_password(password, row[0], row[1]) == True:
+        if hash.check_password(password, row[0], row[1]) == True:
             print("User authenticated")
             users.close()
-            return True
+            return [True, row[2]]
 
     # Close the connection
     users.close()
-    return False
+    #no valid user
+    return [False, 255]
 
 
 def add_to_quarantine(user, path, filename):
