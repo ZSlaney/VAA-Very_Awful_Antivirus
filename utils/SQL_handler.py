@@ -7,7 +7,7 @@ def login(usrname, password):
     users = sqlite3.connect('./databases/users.db')
     u_cursor = users.cursor()
 
-    u_cursor.execute('''SELECT salt, pword, perms_level FROM users WHERE username=(?)''', (usrname,))
+    u_cursor.execute('''SELECT salt, pword, perm_level FROM users WHERE username=(?)''', (usrname,))
     rows = u_cursor.fetchall()
     for row in rows:
         if hash.check_password(password, row[0], row[1]) == True:
