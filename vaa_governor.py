@@ -11,7 +11,7 @@ from utils import SQL_handler as sql
 import ssl
 CERTPATH = os.path.abspath("./cert")
 
-
+scanner_model = model.ModelHandler()
 
 class VaaGovernor:
     def __init__(self, logger):
@@ -64,7 +64,7 @@ class VaaGovernor:
                 #Valid user
                 valid_key = False
                 while valid_key == False:
-                    candidate_key = int.from_bytes(os.urandom(32))
+                    candidate_key = int.from_bytes(os.urandom(8))
                     if self.clients.__contains__(candidate_key) == False:
                         #Key is not a duplicate
                         key =  candidate_key
@@ -82,7 +82,7 @@ class VaaGovernor:
     def verify_session(self, key, perm_level):
         clients = self.list_clients()
         for client in clients:
-            if key == client[0]:
+            if key == client[2]:
                 #valid user
                 if perm_level == client[1]:
                     #no variation - accept
@@ -95,9 +95,11 @@ class VaaGovernor:
     
     def scan(self, file_path, key, perm_level):
         if self.verify_session(key, perm_level) == False:
-            return 
+            return False
         #valid session
-        #job_id = self.scanner.add_job(filepath=file_path, model_name="RandomForestV1")
+        job_id = self.scanner.add_job(filepath=file_path, model_name="RandomForestV1")
+        result = self.scanner.runmodel(jobId=job_id)
+        return result
 
 
         

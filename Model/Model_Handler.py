@@ -22,10 +22,14 @@ class ModelInterface:
         pass
 
 class ModelHandler:
+    from Model.randomforestv1 import handler as rf
+    from Model.logisticregressionv1 import handler as lr
+    from Model.preprocessing import PEExtract
+
     def __init__(self):
         
         self.models = ["RandomForestV1", "LogisticRegressionV1"]
-        self.handlers = {"PEExtract": PEExtract.Processor()}
+        self.handlers = {"PEExtract": self.PEExtract.Processor()}
 
         self.jobs = []  # List to keep track of model jobs
         #{"id", "filepath", "model_name", "status", "result", model_instance}
@@ -36,7 +40,7 @@ class ModelHandler:
     def get_jobs(self):
         return self.jobs
 
-    def runmodel(self, jobId):
+    def runmodel(self, jobId) -> dict:
 
         job = self.jobs[jobId - 1]
         model_instance = job["model_instance"]
@@ -46,13 +50,17 @@ class ModelHandler:
             # Logic to run the model on the given file
             data = handler.execute(path=job["filepath"])
             model_instance.load_model()
-            model_instance.predict(data)
+            res = model_instance.predict(data)
+            return res
+
+            
 
     def add_job(self, filepath, model_name):
         job_id = len(self.jobs) + 1
         match model_name:
             case "RandomForestV1":
-                model_instance = rf.Model()
+                model_instance = self.rf.Model()
+                
             case "LogisticRegressionV1":
                 #model_instance = lr.Model()
                 raise NotImplementedError("Logistic Regression model not implemented yet.")

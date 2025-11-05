@@ -2,7 +2,7 @@ import joblib
 from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import RandomForestClassifier
 import pandas as pd
-from Model_Handler import ModelInterface
+from Model.Model_Handler import ModelInterface
 import os
 
 PATH = os.path.dirname(os.path.abspath(__file__)) + "/random_forest.joblib"
@@ -16,10 +16,11 @@ class Model(ModelInterface):
         # Load the Random Forest model
         self.model:RandomForestClassifier = joblib.load(PATH)
 
-    def predict(self, processed_data: pd.DataFrame):
+    def predict(self, processed_data: pd.DataFrame) -> dict:
         # Make predictions using the loaded Random Forest model
         processed_data = processed_data.drop(columns="SHA256")
         scaler = StandardScaler()
         processed_data = scaler.fit_transform(processed_data)
-        predictions = self.model.predict(processed_data)
-        return predictions
+        prediction = self.model.predict(processed_data)
+        res = {"Classification": prediction, "Confidence": "Unknown"}
+        return res
