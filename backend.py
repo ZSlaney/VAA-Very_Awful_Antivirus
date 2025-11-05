@@ -21,19 +21,24 @@ def get_governor():
 async def list_clients(governor=Depends(get_governor)):
     return {"clients": governor.list_clients()}
 
+class ScanRequest(BaseModel):
+    file_path: str
+    key: int
+    perm_level: int
+
 @app.post("/api/scan")
-async def scan_file(file_path: str, key: int, perm_level: int, governor=Depends(get_governor)):
+async def scan_file(request: ScanRequest, governor=Depends(get_governor)):
     # Placeholder for scanning logic
     # In a real implementation, you would call the scanning functions here
     
-    result = governor.scan(file_path=file_path, key=key, perm_level=perm_level)
+    result = governor.scan(file_path=request.file_path, key=request.key, perm_level=request.perm_level)
     if (result == False):
         #bad login or auth
         return JSONResponse(content={"Auth":"Failed"})
     #scan_result = {"file_path": file_path, "threat_found": False}
     classif = result["Classification"]
     confid = result["Confidence"]
-    scan_result = {"file_path": file_path, "thread_found": bool(classif), "confidence_level": confid}
+    scan_result = {"file_path": request.file_path, "thread_found": bool(classif), "confidence_level": confid}
     return JSONResponse(content=scan_result)
 
 class LoginRequest(BaseModel):

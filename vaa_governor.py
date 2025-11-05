@@ -23,7 +23,7 @@ class VaaGovernor:
             "scan": threading.Lock(),
             "db": threading.Lock()
         }
-        #self.scanner = Model_Handler.ModelHandler()
+        self.scanner = model.ModelHandler()
 
     def start(self):
         self.sslContext = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
@@ -64,7 +64,7 @@ class VaaGovernor:
                 #Valid user
                 valid_key = False
                 while valid_key == False:
-                    candidate_key = int.from_bytes(os.urandom(8))
+                    candidate_key = int.from_bytes(os.urandom(4))
                     if self.clients.__contains__(candidate_key) == False:
                         #Key is not a duplicate
                         key =  candidate_key
@@ -82,9 +82,10 @@ class VaaGovernor:
     def verify_session(self, key, perm_level):
         clients = self.list_clients()
         for client in clients:
-            if key == client[2]:
+            print(client)
+            if key == client[0]:
                 #valid user
-                if perm_level == client[1]:
+                if perm_level == client[2]:
                     #no variation - accept
                     return True
                 else:
