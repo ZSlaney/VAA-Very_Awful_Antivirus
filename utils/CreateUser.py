@@ -1,5 +1,5 @@
 import sqlite3
-from hash_fns import *
+from utils.hash_fns import *
 
 def newUser(Username, Password):
     users = sqlite3.connect('./databases/users.db')

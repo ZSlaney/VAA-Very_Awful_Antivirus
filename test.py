@@ -1,7 +1,8 @@
-import SQL_handler as sql
-from CreateUser import newUser
+import utils.SQL_handler as sql
+from utils.CreateUser import newUser
 import os
 
+sql.add_to_scans("Test1", "/home/test", False, 0)
 print("Users table:\n")
 sql.dump_users_db()
 

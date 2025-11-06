@@ -116,12 +116,12 @@ class VaaGovernor:
         sql.add_to_scans(user=self.get_username(key=key), path=file_path, result=bool(result["Classification"]), confidence=conf)
         return result
     
-    def query_scan_db(self, username, filter, key, perm_level):
+    def query_scan_db(self, filter, key, perm_level):
         if self.verify_session(key, perm_level) == False:
             return False
+        
         #valid session
-        res = sql.read_scans(username)
-        res = reversed(res)
+        res = sql.read_scans(self.get_username(key=key))
         print(res)
         #do filter stuff here
 

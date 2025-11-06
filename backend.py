@@ -22,14 +22,13 @@ async def list_clients(governor=Depends(get_governor)):
     return {"clients": governor.list_clients()}
 
 class ScanDatabase(BaseModel):
-    username: str
     filter: dict
     key: int
     perm_level: int
 
 @app.post("/api/scan/find")
 async def scan_database(request: ScanDatabase, governor=Depends(get_governor)):
-    res = governor.query_scan_db(username=request.username, filter=request.filter, key=request.key, perm_level=request.perm_level)
+    res = governor.query_scan_db(filter=request.filter, key=request.key, perm_level=request.perm_level)
 
     if res == False:
         #bad login or auth
@@ -37,21 +36,22 @@ async def scan_database(request: ScanDatabase, governor=Depends(get_governor)):
     
     full_scan_list = []
     for scan in res:
-        #0-username
-        #1-path
-        #2-result
-        #3-confidence -- -1 means unknown
-        if scan[3] == -1:
-            conf = "Known"
+        #0-prim key
+        #1-username
+        #2-path
+        #3-result
+        #4-confidence -- -1 means unknown
+        if scan[4] == -1:
+            conf = "Unknown"
         else:
-            conf = scan[3]
+            conf = scan[4]
 
-        if scan[2] == True:
+        if scan[3] == True:
             res = "MALWARE"
         else:
             res = "BENIGNWARE"
 
-        scan_entry = {"Path":scan[1], "Result":res, "Confidence":conf}
+        scan_entry = {"Path":scan[2], "Result":res, "Confidence":conf}
         full_scan_list.append(scan_entry)
 
     return JSONResponse(content=full_scan_list)

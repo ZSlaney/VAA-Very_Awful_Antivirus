@@ -74,6 +74,7 @@ def add_to_scans(user, path, result, confidence):
     ''')
 
     cursor.execute('''INSERT INTO scans (user, path, result, confidence) VALUES ((?), (?), (?), (?))''', (user, path, result, confidence))
+    db.commit()
     db.close()
 
 def read_scans(user):
@@ -138,8 +139,8 @@ def dump_scans_db():
             id INTEGER PRIMARY KEY,
             user TEXT,
             path TEXT,
-            malware_files INTEGER,
-            total_files INTEGER
+            result BOOLEAN,
+            confidence INTEGER
         )
     ''')
 
