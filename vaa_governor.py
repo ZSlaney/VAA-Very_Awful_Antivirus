@@ -121,10 +121,37 @@ class VaaGovernor:
             return False
         
         #valid session
-        res = sql.read_scans(self.get_username(key=key))
-        print(res)
-        #do filter stuff here
+        res = sql.read_scans(self.get_username(key=key)) 
+        
+        #Sort newest to oldest
+        res.reverse()
 
+        #Filtering
+            #Key for internal list
+            #0-prim key
+            #1-username
+            #2-path
+            #3-result
+            #4-confidence -- -1 means unknown
+
+        if "result" in filter:
+            match filter["result"]:
+                case "MALWARE":
+                    for scan in res:
+                        if scan[3] == False:
+                            res.remove(scan)
+                case "BENIGNWARE":
+                    for scan in res:
+                        if scan[3] == True:
+                            res.remove(scan)
+
+        if "limit" in filter:
+            if type(filter["limit"]) == int:
+                #Valid number
+                if filter["limit"] >= 0:
+                    res = res[:filter["limit"]]
+
+                
         return res
 
 

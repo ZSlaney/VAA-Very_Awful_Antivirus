@@ -10,7 +10,6 @@ frontenddir = os.path.join(os.path.dirname(__file__), "frontend/dist")
 app = FastAPI()
 
 
-
 # Dependency to access the VaaGovernor instance
 def get_governor():
     return app.state.governor
@@ -33,7 +32,7 @@ async def scan_database(request: ScanDatabase, governor=Depends(get_governor)):
     if res == False:
         #bad login or auth
         return JSONResponse(content={"Auth":"Failed"})
-    
+
     full_scan_list = []
     for scan in res:
         #0-prim key
