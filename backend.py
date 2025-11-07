@@ -4,10 +4,20 @@ from fastapi import FastAPI, Depends
 from fastapi.responses import JSONResponse
 import os
 from pydantic import BaseModel
+from contextlib import asynccontextmanager
+from datetime import datetime, timedelta
 
 frontenddir = os.path.join(os.path.dirname(__file__), "frontend/dist")
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    global startup_time
+    startup_time = datetime.now()
+    print("FastAPI application starting up...")
+    yield
+    print("FastAPI application shutting down...")
+
+app = FastAPI(lifespan=lifespan)
 
 
 # Dependency to access the VaaGovernor instance
@@ -19,6 +29,18 @@ def get_governor():
 @app.get("/api/clients")
 async def list_clients(governor=Depends(get_governor)):
     return {"clients": governor.list_clients()}
+
+@app.get("/api/version")
+async def get_api_version():
+    return {"Version":app.version, "VAA Build":"1.0"}
+
+@app.get("/api/uptime")
+async def get_uptime():
+    if startup_time:
+        uptime_duration: timedelta = datetime.now() - startup_time
+        return {"uptime": str(uptime_duration)}
+    else:
+        return {"uptime": "Application startup time not recorded."}
 
 class ScanDatabase(BaseModel):
     filter: dict
