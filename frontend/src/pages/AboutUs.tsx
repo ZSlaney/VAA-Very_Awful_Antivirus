@@ -12,7 +12,6 @@ import {  Grid } from '@mui/joy';
 import SideDrawer from '../components/Navigation';
 import type { PageType } from '../App';
 import SmallTabBar from '../components/SmallTabBar';
-const data = [{ name: 'Page A', uv: 400, pv: 2400, amt: 2400 }, { name: 'Page B', uv: 300, pv: 4567, amt: 2400 }, { name: 'Page C', uv: 200, pv: 1398, amt: 2400 }, { name: 'Page D', uv: 278, pv: 3908, amt: 2400 }, { name: 'Page E', uv: 189, pv: 4800, amt: 2400 }, { name: 'Page F', uv: 239, pv: 3800, amt: 2400 }, { name: 'Page G', uv: 349, pv: 4300, amt: 2400 }];
 
 
 
@@ -71,7 +70,10 @@ export default function AboutUs({setPage}: {setPage: React.Dispatch<React.SetSta
                             noWrap={false}
                             variant="plain"
                         >
-                            Placeholder about us text
+                            Very Awful Antivirus (VA-AV) wants to revolutionise how people interact with anti-virus software, large commertial solutions are too
+                            expensive and invasive for typical home uses, but home users still need something to help when they are not sure about a file! 
+                            We have developed AI models to help determine if a Windows Portable Executable (.exe file) is malware and give a confidence score. 
+                            We have integrated our AI with a slick web-based user interface that allows our customers to upload files from anywhere.
                         </Typography>
                 </Grid>
                 <Grid xs={12} sm={1}>
@@ -97,7 +99,13 @@ export default function AboutUs({setPage}: {setPage: React.Dispatch<React.SetSta
                 noWrap={false}
                 variant="plain"
             >
-                Something something APPs.
+                Very Awful Antivirus (VA-AV) does not keep record of your name, email or any other personal identifiable information, we do however store file paths to the files uploaded
+                to our solution, which may include your name if the username includes your name. The file paths uploaded are not associated with any other identifiable 
+                information and cannot be accessed by other users. We will not sell any of the information and/or data uploaded to VA-AV or otherwise collected by VA-AV.
+                <br/>
+                <br/>
+                Questions, concerns or clarifications can be addressed to:
+                Zach Slaney - 103612275@student.swin.edu.au
             </Typography>
           </Box>
         </Layout.Main>
