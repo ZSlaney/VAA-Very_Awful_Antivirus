@@ -1,6 +1,6 @@
 
 export function getSessionKey(): string | null {
-  const key = sessionStorage.getItem('sessionKey');
+  const key = sessionStorage.getItem('vaa-sessionKey');
     return key ? key : null;
 }
 
