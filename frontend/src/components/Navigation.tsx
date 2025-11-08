@@ -23,107 +23,15 @@ export default function SideDrawer() {
           sx={{ '& .JoyListItemButton-root': { p: '8px' } }}
         >
           <ListItem>
-            <ListItemButton selected>
-              <ListItemDecorator>
-                <SettingsPowerIcon fontSize="small" />
-              </ListItemDecorator>
-              <ListItemContent>Power Options</ListItemContent>
-            </ListItemButton>
-          </ListItem>
-          <ListItem>
             <ListItemButton>
               <ListItemDecorator>
                 <EventNoteIcon fontSize="small" />
               </ListItemDecorator>
-              <ListItemContent>Logs</ListItemContent>
-            </ListItemButton>
-          </ListItem>
-          <ListItem>
-            <ListItemButton>
-              <ListItemDecorator>
-                <SdCardAlertIcon fontSize="small" />
-              </ListItemDecorator>
-              <ListItemContent>Quarantine</ListItemContent>
+              <ListItemContent>Logs</ListItemContent> 
             </ListItemButton>
           </ListItem>
         </List>
       </ListItem>
-      {/** Right drawer 
-      <ListItem nested sx={{ mt: 2 }}>
-        <ListSubheader sx={{ letterSpacing: '2px', fontWeight: '800' }}>
-          Quick Options
-        </ListSubheader>
-        <List
-          aria-labelledby="nav-list-quick-options"
-          size="sm"
-          sx={{
-            '--ListItemDecorator-size': '32px',
-            '& .JoyListItemButton-root': { p: '8px' },
-          }}
-        >
-          <ListItem>
-            <ListItemButton>
-              <ListItemDecorator>
-                <Box
-                  sx={{
-                    width: '10px',
-                    height: '10px',
-                    borderRadius: '99px',
-                    bgcolor: 'primary.500',
-                  }}
-                />
-              </ListItemDecorator>
-              <ListItemContent>Personal</ListItemContent>
-            </ListItemButton>
-          </ListItem>
-          <ListItem>
-            <ListItemButton>
-              <ListItemDecorator>
-                <Box
-                  sx={{
-                    width: '10px',
-                    height: '10px',
-                    borderRadius: '99px',
-                    bgcolor: 'danger.500',
-                  }}
-                />
-              </ListItemDecorator>
-              <ListItemContent>Work</ListItemContent>
-            </ListItemButton>
-          </ListItem>
-          <ListItem>
-            <ListItemButton>
-              <ListItemDecorator>
-                <Box
-                  sx={{
-                    width: '10px',
-                    height: '10px',
-                    borderRadius: '99px',
-                    bgcolor: 'warning.400',
-                  }}
-                />
-              </ListItemDecorator>
-              <ListItemContent>Travels</ListItemContent>
-            </ListItemButton>
-          </ListItem>
-          <ListItem>
-            <ListItemButton>
-              <ListItemDecorator>
-                <Box
-                  sx={{
-                    width: '10px',
-                    height: '10px',
-                    borderRadius: '99px',
-                    bgcolor: 'success.400',
-                  }}
-                />
-              </ListItemDecorator>
-              <ListItemContent>Concert tickets</ListItemContent>
-            </ListItemButton>
-          </ListItem>
-        </List>
-      </ListItem>
-      */}
     </List>
   );
 }

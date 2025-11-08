@@ -6,38 +6,43 @@ import Box from '@mui/joy/Box';
 import Button from '@mui/joy/Button';
 import Card from '@mui/joy/Card';
 import CardOverflow from '@mui/joy/CardOverflow';
-
 import Typography from '@mui/joy/Typography';
-
 import Sheet from '@mui/joy/Sheet';
 import Stack from '@mui/joy/Stack';
-
+import { CircularProgress, Grid } from '@mui/joy';
 
 import FolderRoundedIcon from '@mui/icons-material/FolderRounded';
-
 import EmailRoundedIcon from '@mui/icons-material/EmailRounded';
 import PeopleAltRoundedIcon from '@mui/icons-material/PeopleAltRounded';
-
+import TroubleshootIcon from '@mui/icons-material/Troubleshoot';
+import FindInPageIcon from '@mui/icons-material/FindInPage';
 
 import Layout from '../components/Layout';
 import Header from '../components/Header';
-
-
-import { CircularProgress, Grid } from '@mui/joy';
-import TroubleshootIcon from '@mui/icons-material/Troubleshoot';
-
-
-import FindInPageIcon from '@mui/icons-material/FindInPage';
-
-import { LineChart, Line, CartesianGrid, XAxis, YAxis, Legend, ResponsiveContainer } from 'recharts';
 import SideDrawer from '../components/Navigation';
-const data = [{ name: 'Page A', uv: 400, pv: 2400, amt: 2400 }, { name: 'Page B', uv: 300, pv: 4567, amt: 2400 }, { name: 'Page C', uv: 200, pv: 1398, amt: 2400 }, { name: 'Page D', uv: 278, pv: 3908, amt: 2400 }, { name: 'Page E', uv: 189, pv: 4800, amt: 2400 }, { name: 'Page F', uv: 239, pv: 3800, amt: 2400 }, { name: 'Page G', uv: 349, pv: 4300, amt: 2400 }];
+
+
+
+import { DEBUG, type PageType } from '../App';
+import JobsList from '../components/JobsTable';
 
 
 
 
-export default function FilesExample({setPage}: {setPage: React.Dispatch<React.SetStateAction<'login' | 'dashboard' | 'about'>>}) {
+export default function FilesExample({setPage}: {setPage: React.Dispatch<React.SetStateAction<PageType>>}) {
   const [drawerOpen, setDrawerOpen] = React.useState(false);
+  
+  //if session key is invalid, redirect to login page
+  if (DEBUG) {
+    console.log('Rendering Dashboard component');
+  } else {
+    // Check if session key is valid
+    const isValidSession = true; // Replace with actual session validation logic
+    if (!isValidSession) {
+      setPage('login');
+    }
+  }
+  
   return (
     <CssVarsProvider disableTransitionOnChange>
       <CssBaseline />
@@ -301,22 +306,8 @@ export default function FilesExample({setPage}: {setPage: React.Dispatch<React.S
               }}
             >
               <Stack justifyContent="space-between" sx={{ p: 2, flexGrow: 1 }}>
-                <Typography level="title-md" sx={{ mb: 2 }}>
-                  Recent Scan Confidence
-                </Typography>
-                <AspectRatio ratio="16/9" color="neutral" sx={{ borderRadius: 0 }}>
-                  <Box sx={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', mb: 2 }}>
-                    <ResponsiveContainer width="90%" height="90%">
-                      <LineChart data={data}>
-                        <CartesianGrid stroke="#aaa" strokeDasharray="5 5" />
-                        <Line type="monotone" dataKey="uv" stroke="purple" strokeWidth={2} name="Some Data" />
-                        <XAxis dataKey="name" />
-                        <YAxis width="auto" label={{ value: 'average confidence', position: 'insideLeft', angle: -90 }} />
-                        <Legend align="right" />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </Box>
-                </AspectRatio>
+                <Typography level="title-lg">Active Jobs</Typography>
+                <JobsList />
               </Stack>
             </Sheet>
 

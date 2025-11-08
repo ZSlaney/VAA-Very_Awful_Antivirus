@@ -2,17 +2,21 @@ import * as React from 'react';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import AboutUs from './pages/AboutUs';
+import Analytics from './pages/Analytics';
 
 
+export type PageType = 'login' | 'dashboard' | 'about' | 'analytics';
 
+export const DEBUG = true;
 
 export default function App() {
-  const [page, setPage] = React.useState<'login' | 'dashboard' | 'about'>('login');
+  const [page, setPage] = React.useState<PageType>('login');
   return (
     <>
     {page === 'login' && <Login setPage={setPage} />}
     {page === 'dashboard' && <Dashboard setPage={setPage} />}
-    {page === 'about' && <AboutUs />}
+    {page === 'about' && <AboutUs setPage={setPage} />}
+    {page === 'analytics' && <Analytics setPage={setPage} />}
     </>
           
   );

@@ -26,6 +26,7 @@ import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 
 import Navigation from './Navigation';
 import { clearAuth } from '../context/utils';
+import type { PageType } from '../App';
 
 function ColorSchemeToggle() {
   const { mode, setMode } = useColorScheme();
@@ -58,7 +59,7 @@ function ColorSchemeToggle() {
   );
 }
 
-export default function Header({setPage}: {setPage: React.Dispatch<React.SetStateAction<'login' | 'dashboard' | 'about'>>}) {
+export default function Header({setPage}: {setPage: React.Dispatch<React.SetStateAction<PageType>>}) {
   const [open, setOpen] = React.useState(false);
   const OnLogout = () => {
     // Clear session key and redirect to login page
@@ -88,9 +89,8 @@ export default function Header({setPage}: {setPage: React.Dispatch<React.SetStat
         <Button
           variant="plain"
           color="neutral"
-          component="a"
-          href="/dashboard"
-          aria-pressed={window.location.pathname === '/dashboard'}
+
+          onClick={() => setPage('dashboard')}
           size="sm"
           sx={{ alignSelf: 'center' }}
         >
@@ -99,9 +99,7 @@ export default function Header({setPage}: {setPage: React.Dispatch<React.SetStat
         <Button
           variant="plain"
           color="neutral"
-          component="a"
-          aria-pressed={window.location.pathname === '/analytics'}
-          href="/analytics"
+          onClick={() => setPage('analytics')}
           size="sm"
           sx={{ alignSelf: 'center' }}
         >
@@ -121,9 +119,7 @@ export default function Header({setPage}: {setPage: React.Dispatch<React.SetStat
         <Button
           variant="plain"
           color="neutral"
-          component="a"
-          href="/about"
-          aria-pressed={window.location.pathname === '/about'}
+          onClick={() => setPage('about')}
           size="sm"
           sx={{ alignSelf: 'center' }}
         >

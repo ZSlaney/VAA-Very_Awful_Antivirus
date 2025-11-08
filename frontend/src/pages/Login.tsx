@@ -16,7 +16,7 @@ import Stack from '@mui/joy/Stack';
 import Logo from '../../public/VA-AV.png';
 
 import { issueAuth } from '../context/utils';
-
+import { DEBUG, type PageType } from '../App';
 
 interface FormElements extends HTMLFormControlsCollection {
   email: HTMLInputElement;
@@ -28,16 +28,22 @@ interface FormElements extends HTMLFormControlsCollection {
 
 const customTheme = extendTheme({});
 
-export default function Login({ setPage }: { setPage: React.Dispatch<React.SetStateAction<'login' | 'dashboard' | 'about'>> }) {
+export default function Login({ setPage }: { setPage: React.Dispatch<React.SetStateAction<PageType>> }) {
   const [loading, setLoading] = React.useState(false);
 
   const handleLogin = async (username: string, password: string) => {
     try {
       setLoading(true);
-      const sessionKey = await issueAuth(username, password);
-      if (sessionKey) {
+      if (DEBUG) {
+        console.log(`Attempting login with username: ${username} and password: ${password}`);
         setPage('dashboard');
+      } else {
+        const sessionKey = await issueAuth(username, password);
+        if (sessionKey) {
+          setPage('dashboard');
+        }
       }
+
     } catch (error) {
       console.error('Login failed:', error);
     } finally {
