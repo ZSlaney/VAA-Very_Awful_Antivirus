@@ -2,14 +2,8 @@ import * as React from 'react';
 import { CssVarsProvider } from '@mui/joy/styles';
 import CssBaseline from '@mui/joy/CssBaseline';
 import Box from '@mui/joy/Box';
-import Button from '@mui/joy/Button';
+
 import Typography from '@mui/joy/Typography';
-
-import Stack from '@mui/joy/Stack';
-import FolderRoundedIcon from '@mui/icons-material/FolderRounded';
-
-import EmailRoundedIcon from '@mui/icons-material/EmailRounded';
-import PeopleAltRoundedIcon from '@mui/icons-material/PeopleAltRounded';
 
 
 import Layout from '../components/Layout';

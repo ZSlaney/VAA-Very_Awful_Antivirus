@@ -108,9 +108,7 @@ export default function Header({setPage}: {setPage: React.Dispatch<React.SetStat
         <Button
           variant="plain"
           color="neutral"
-          aria-pressed={window.location.pathname === '/scantool'}
-          component="a"
-          href="/scantool"
+          onClick={() => setPage('scantool')}
           size="sm"
           sx={{ alignSelf: 'center' }}
         >

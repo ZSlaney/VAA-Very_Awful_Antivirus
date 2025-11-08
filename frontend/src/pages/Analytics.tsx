@@ -64,6 +64,7 @@ const data = [
   },
 ];
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Legend, ResponsiveContainer } from 'recharts';
+import ScansTable from '../components/ScanTable';
 
 
 
@@ -228,7 +229,7 @@ export default function Analytics({setPage}: {setPage: React.Dispatch<React.SetS
                 display: { xs: 'none', md: 'flex' },
               }}
             >
-              <JobsTable />
+              <ScansTable />
             </Sheet>
             <Sheet
               variant="outlined"
