@@ -9,6 +9,8 @@ from datetime import datetime, timedelta
 
 frontenddir = os.path.join(os.path.dirname(__file__), "frontend/dist")
 
+ENABLE_DOCS = True
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global startup_time
@@ -17,7 +19,10 @@ async def lifespan(app: FastAPI):
     yield
     print("FastAPI application shutting down...")
 
-app = FastAPI(lifespan=lifespan)
+if ENABLE_DOCS == True:
+    app = FastAPI(lifespan=lifespan)
+else:
+    app = FastAPI(lifespan=lifespan, docs_url=None, redoc_url=None)
 
 
 # Dependency to access the VaaGovernor instance
