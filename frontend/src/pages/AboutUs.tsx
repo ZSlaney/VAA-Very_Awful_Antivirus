@@ -13,6 +13,8 @@ import SideDrawer from '../components/Navigation';
 import type { PageType } from '../App';
 import SmallTabBar from '../components/SmallTabBar';
 
+import Logo from '../../public/VA-AV.png';
+
 
 
 
@@ -80,7 +82,7 @@ export default function AboutUs({setPage}: {setPage: React.Dispatch<React.SetSta
 
                 </Grid>
                 <Grid xs={12} sm={1}>
-                    <img src="src/assets/VA-AV.png"/>
+                    <img src={Logo} width={520} />
                 </Grid>
             </Grid>
         
