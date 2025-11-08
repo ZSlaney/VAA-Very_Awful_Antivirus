@@ -3,6 +3,17 @@ export function getSessionKey(): string | null {
   const key = sessionStorage.getItem('vaa-sessionKey');
     return key ? key : null;
 }
+export function getPermLevel(): string | null {
+  const level = sessionStorage.getItem('vaa-permLevel');
+    return level ? level : null;
+}
+function setPermLevel(level: string | null): void {
+  if (level) {
+    sessionStorage.setItem('vaa-permLevel', level);
+  } else {
+    sessionStorage.removeItem('vaa-permLevel');
+  }
+}
 
 export function setSessionKey(key: string | null): void {
   if (key) {
@@ -27,6 +38,7 @@ export function issueAuth(username: string, password: string): Promise<string> {
     })
     .then((data) => {
       if (data.Key && data.Key !== 'NONE') {
+        setPermLevel(data.Permission_Level);
         setSessionKey(data.Key);
         return data.Key;
       }
@@ -38,5 +50,27 @@ export function issueAuth(username: string, password: string): Promise<string> {
 
 export function clearAuth(): void {
   setSessionKey(null);
+  setPermLevel(null);
   // Clear any other authentication-related data here if necessary
 }
+
+
+export function issueScanRequest(filepath: string): Promise<any> {
+  const sessionKey = getSessionKey();
+  const perm_level = getPermLevel();
+  return fetch('/api/scan', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ filepath, key: sessionKey, perm_level}),
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error('Scan request failed');
+      }
+      const jobid = response.json();
+      return jobid;
+    });
+}
+
