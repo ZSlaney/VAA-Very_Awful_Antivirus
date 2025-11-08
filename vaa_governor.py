@@ -145,8 +145,11 @@ class VaaGovernor:
 
         with self.locks["scan"]:
             #Check job belongs to this user
-            # if self.current_jobs[str(job_id)] != key:
-            #     return False
+            if str(job_id) not in self.current_jobs:
+                return {"Status": "No job for you by that number"}
+            
+            if self.current_jobs[str(job_id)] != key:
+                return {"Status": "No job for you by that number"}
             
             #Job belongs to this user
             
