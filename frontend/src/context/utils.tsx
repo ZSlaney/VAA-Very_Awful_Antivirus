@@ -6,9 +6,9 @@ export function getSessionKey(): string | null {
 
 export function setSessionKey(key: string | null): void {
   if (key) {
-    sessionStorage.setItem('sessionKey', key);
+    sessionStorage.setItem('vaa-sessionKey', key);
   } else {
-    sessionStorage.removeItem('sessionKey');
+    sessionStorage.removeItem('vaa-sessionKey');
   }
 }
 export function issueAuth(username: string, password: string): Promise<string> {

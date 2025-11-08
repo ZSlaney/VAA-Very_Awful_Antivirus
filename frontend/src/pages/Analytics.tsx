@@ -65,13 +65,24 @@ const data = [
 ];
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Legend, ResponsiveContainer } from 'recharts';
 import ScansTable from '../components/ScanTable';
+import { getSessionKey } from '../context/utils';
 
 
-
-export default function Analytics({setPage}: {setPage: React.Dispatch<React.SetStateAction<PageType>>}) {
+export default function Analytics({ setPage }: { setPage: React.Dispatch<React.SetStateAction<PageType>> }) {
   const [drawerOpen, setDrawerOpen] = React.useState(false);
+  //if session key is invalid, redirect to login page
+  if (DEBUG) {
+    console.log('Rendering Dashboard component');
+  } else {
+    // Check if session key is valid
+    const sessionKey = getSessionKey();
+    const isValidSession = sessionKey !== null && sessionKey !== undefined && sessionKey !== '';
+    if (!isValidSession) {
 
-  
+      setPage('login');
+    }
+  }
+
 
   return (
     <CssVarsProvider disableTransitionOnChange>
@@ -81,7 +92,7 @@ export default function Analytics({setPage}: {setPage: React.Dispatch<React.SetS
           <Navigation />
         </Layout.SideDrawer>
       )}
-      <SmallTabBar/>
+      <SmallTabBar />
       <Layout.Root
         sx={[
           {
@@ -120,7 +131,7 @@ export default function Analytics({setPage}: {setPage: React.Dispatch<React.SetS
                 width: '100%',
               }}
             >
-              <Stack justifyContent="space-between" sx={{ p: 2 , width: '100%'}}>
+              <Stack justifyContent="space-between" sx={{ p: 2, width: '100%' }}>
                 <Typography level="title-md">
                   Malware Detections
                 </Typography>
@@ -128,13 +139,13 @@ export default function Analytics({setPage}: {setPage: React.Dispatch<React.SetS
                   <Box sx={{ width: '50%', height: '50%', display: 'flex', alignItems: 'center', mb: 2 }}>
                     <ResponsiveContainer width="90%" height="90%">
                       <LineChart
-                              data={data}
-                              
-                            >
-                              <CartesianGrid stroke="#aaa" strokeDasharray="5 5" />
-                              <Line type="monotone" dataKey="uv" stroke="purple" strokeWidth={2} name="My data series name" />
-                              <XAxis dataKey="name" />                             
-                            </LineChart>
+                        data={data}
+
+                      >
+                        <CartesianGrid stroke="#aaa" strokeDasharray="5 5" />
+                        <Line type="monotone" dataKey="uv" stroke="purple" strokeWidth={2} name="My data series name" />
+                        <XAxis dataKey="name" />
+                      </LineChart>
                     </ResponsiveContainer>
                   </Box>
                 </AspectRatio>
@@ -148,7 +159,7 @@ export default function Analytics({setPage}: {setPage: React.Dispatch<React.SetS
                 width: '100%',
               }}
             >
-              <Stack justifyContent="space-between" sx={{ p: 2 , width: '100%'}}>
+              <Stack justifyContent="space-between" sx={{ p: 2, width: '100%' }}>
                 <Typography level="title-md">
                   Scan Confidence
                 </Typography>
@@ -156,12 +167,12 @@ export default function Analytics({setPage}: {setPage: React.Dispatch<React.SetS
                   <Box sx={{ width: '50%', height: '50%', display: 'flex', alignItems: 'center', mb: 2 }}>
                     <ResponsiveContainer width="90%" height="90%">
                       <LineChart
-                              data={data}
-                            >
-                              <CartesianGrid stroke="#aaa" strokeDasharray="5 5" />
-                              <Line type="monotone" dataKey="uv" stroke="purple" strokeWidth={2} name="My data series name" />
-                              <XAxis dataKey="name" />
-                            </LineChart>
+                        data={data}
+                      >
+                        <CartesianGrid stroke="#aaa" strokeDasharray="5 5" />
+                        <Line type="monotone" dataKey="uv" stroke="purple" strokeWidth={2} name="My data series name" />
+                        <XAxis dataKey="name" />
+                      </LineChart>
                     </ResponsiveContainer>
                   </Box>
                 </AspectRatio>
@@ -175,20 +186,20 @@ export default function Analytics({setPage}: {setPage: React.Dispatch<React.SetS
                 width: '100%',
               }}
             >
-              <Stack justifyContent="space-between" sx={{ p: 1 , width: '100%'}}>
-                <Typography level="title-md" sx={{mt:1, ml:1, mb:1}}>
+              <Stack justifyContent="space-between" sx={{ p: 1, width: '100%' }}>
+                <Typography level="title-md" sx={{ mt: 1, ml: 1, mb: 1 }}>
                   Jobs
                 </Typography>
                 <AspectRatio ratio="16/9" color="neutral" sx={{ borderRadius: 0 }}>
                   <Box sx={{ width: '50%', height: '50%', display: 'flex', alignItems: 'center', mb: 2 }}>
                     <ResponsiveContainer width="90%" height="90%">
                       <LineChart
-                              data={data}
-                            >
-                              <CartesianGrid stroke="#aaa" strokeDasharray="5 5" />
-                              <Line type="monotone" dataKey="uv" stroke="purple" strokeWidth={2} name="My data series name" />
-                              <XAxis dataKey="name" />
-                            </LineChart>
+                        data={data}
+                      >
+                        <CartesianGrid stroke="#aaa" strokeDasharray="5 5" />
+                        <Line type="monotone" dataKey="uv" stroke="purple" strokeWidth={2} name="My data series name" />
+                        <XAxis dataKey="name" />
+                      </LineChart>
                     </ResponsiveContainer>
                   </Box>
                 </AspectRatio>
@@ -202,20 +213,20 @@ export default function Analytics({setPage}: {setPage: React.Dispatch<React.SetS
                 width: '100%',
               }}
             >
-              <Stack justifyContent="space-between" sx={{ p: 1 , width: '100%'}}>
-                <Typography level="title-md" sx={{mt:1, ml:1, mb:1}}>
+              <Stack justifyContent="space-between" sx={{ p: 1, width: '100%' }}>
+                <Typography level="title-md" sx={{ mt: 1, ml: 1, mb: 1 }}>
                   Most Used Model
                 </Typography>
                 <AspectRatio ratio="16/9" color="neutral" sx={{ borderRadius: 0 }}>
                   <Box sx={{ width: '50%', height: '50%', display: 'flex', alignItems: 'center', mb: 2 }}>
                     <ResponsiveContainer width="95%" height="95%">
                       <LineChart
-                              data={data}
-                            >
-                              <CartesianGrid stroke="#aaa" strokeDasharray="5 5" />
-                              <Line type="monotone" dataKey="uv" stroke="purple" strokeWidth={2} name="My data series name" />
-                              <XAxis dataKey="name" />
-                            </LineChart>
+                        data={data}
+                      >
+                        <CartesianGrid stroke="#aaa" strokeDasharray="5 5" />
+                        <Line type="monotone" dataKey="uv" stroke="purple" strokeWidth={2} name="My data series name" />
+                        <XAxis dataKey="name" />
+                      </LineChart>
                     </ResponsiveContainer>
                   </Box>
                 </AspectRatio>
@@ -254,4 +265,3 @@ export default function Analytics({setPage}: {setPage: React.Dispatch<React.SetS
     </CssVarsProvider>
   );
 }
-  

@@ -22,11 +22,9 @@ import Header from '../components/Header';
 import SideDrawer from '../components/Navigation';
 
 
-
 import { DEBUG, type PageType } from '../App';
 import JobsList from '../components/JobsTable';
-
-
+import { getSessionKey } from '../context/utils';
 
 
 export default function FilesExample({setPage}: {setPage: React.Dispatch<React.SetStateAction<PageType>>}) {
@@ -37,8 +35,10 @@ export default function FilesExample({setPage}: {setPage: React.Dispatch<React.S
     console.log('Rendering Dashboard component');
   } else {
     // Check if session key is valid
-    const isValidSession = true; // Replace with actual session validation logic
+    const sessionKey = getSessionKey();
+    const isValidSession = sessionKey !== null && sessionKey !== undefined && sessionKey !== '';
     if (!isValidSession) {
+      
       setPage('login');
     }
   }
@@ -193,7 +193,7 @@ export default function FilesExample({setPage}: {setPage: React.Dispatch<React.S
               <Grid container spacing={2} sx={{ p: 2, flexGrow: 1 }}>
                 <Grid xs={4} sm={4}>
                   <Typography level="body-sm" sx={{ color: 'text.secondary' }}>
-                    System
+                    System Uptime
                   </Typography>
                   <Typography level="title-lg" color='success'>Healthy</Typography>
                 </Grid>

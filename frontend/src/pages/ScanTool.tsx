@@ -52,9 +52,33 @@ import  StepIndicator from '@mui/joy/StepIndicator';
 import SmallTabBar from '../components/SmallTabBar';
 import type { PageType } from '../App';
 
+interface Job {
+  id: number;
+  filepath: string;
+  model: string;
+  status: 'Pending' | 'Running' | 'Completed' | 'Failed';
+  result: string;
+}
 
-export default function ScanTool({setPage}: {setPage: React.Dispatch<React.SetStateAction<PageType>>}) {
+import { DEBUG } from '../App';
+import { getSessionKey } from '../context/utils';
+
+export default function ScanTool({setPage }: {setPage: React.Dispatch<React.SetStateAction<PageType>>}) {
   const [drawerOpen, setDrawerOpen] = React.useState(false);
+
+  //if session key is invalid, redirect to login page
+    if (DEBUG) {
+      console.log('Rendering Dashboard component');
+    } else {
+      // Check if session key is valid
+      const sessionKey = getSessionKey();
+      const isValidSession = sessionKey !== null && sessionKey !== undefined && sessionKey !== '';
+      if (!isValidSession) {
+        
+        setPage('login');
+      }
+    }
+
   return (
     <CssVarsProvider disableTransitionOnChange>
       <CssBaseline />
