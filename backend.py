@@ -1,13 +1,20 @@
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, File, UploadFile, Form, status
 from fastapi.responses import JSONResponse
+from fastapi.exceptions import HTTPException
+from fastapi.encoders import jsonable_encoder
 import os
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta
+import shutil
+from typing import List
+
 
 frontenddir = os.path.join(os.path.dirname(__file__), "frontend/dist")
+
+TMP_FOLDER = os.path.dirname(os.path.abspath(__file__)) + "/tmp/"
 
 ENABLE_DOCS = True
 
@@ -95,20 +102,37 @@ async def scan_database(request: ScanDatabase, governor=Depends(get_governor)):
     return JSONResponse(content=full_scan_list)
 
 class ScanRequest(BaseModel):
-    file_path: str
     key: int
     perm_level: int
 
+def checker(data: str = Form(...)):
+    try:
+        return ScanRequest.model_validate_json(data)
+    except ValidationError as e:
+        raise HTTPException(
+            detail=jsonable_encoder(e.errors()),
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        )
+
+
 @app.post("/api/scan/add")
-async def scan_file(request: ScanRequest, governor=Depends(get_governor)):
+async def scan_file(request: ScanRequest = Depends(checker), up_file: UploadFile = File(...), governor=Depends(get_governor)):
     
-    job = governor.scan(file_path=request.file_path, key=request.key, perm_level=request.perm_level)
+    if request.key == None:
+        return{"Auth":"Failed"}
+    
+    #return {"Path": TMP_FOLDER + str(request.key) + "/" + up_file.filename}
+    os.mkdir(TMP_FOLDER + str(request.key))
+    with open(TMP_FOLDER + str(request.key) + "/" + up_file.filename, "xb") as file_object:
+        shutil.copyfileobj(up_file.file, file_object)
+    
+    job = governor.scan(file_name=up_file.filename, key=request.key, perm_level=request.perm_level)
     if (job == False):
         #bad login or auth
         return JSONResponse(content={"Auth":"Failed"})
     
     return {"Job Id": job}
-    
+
 
 class JobRequest(BaseModel):
     job_id: int
@@ -128,7 +152,7 @@ async def find_job(job_request: JobRequest, governor=Depends(get_governor)):
         #not ready yet
         return result
     
-    scan_result = {"file_path": result["file_path"], "thread_found": bool(result["Classification"]), "confidence_level": result["Confidence"]}
+    scan_result = {"file_name": result["file_name"], "thread_found": bool(result["Classification"]), "confidence_level": result["Confidence"]}
     return JSONResponse(content=scan_result)
 
 

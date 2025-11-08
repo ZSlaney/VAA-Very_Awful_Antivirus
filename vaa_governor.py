@@ -9,7 +9,10 @@ from utils import SQL_handler as sql
 from Model import Model_Handler as model
 #from pystray import Icon as icon, Menu as menu, MenuItem as item
 import ssl
+from pathlib import Path
 CERTPATH = os.path.abspath("./cert")
+
+TMP_FOLDER = os.path.dirname(os.path.abspath(__file__)) + "/tmp/"
 
 scanner_model = model.ModelHandler()
 
@@ -107,24 +110,39 @@ class VaaGovernor:
     
         return ""
     
-    def scan(self, file_path, key, perm_level):
+    def scan(self, file_name, key, perm_level):
+        
+        path = Path(TMP_FOLDER + str(key) + "/" + file_name)
+
         if self.verify_session(key, perm_level) == False:
+            path.unlink()    
             return False
         
         #valid session
         with self.locks["scan"]:
-            job_id = self.scanner.add_job(filepath=file_path, model_name="RandomForestV1")
+            job_id = self.scanner.add_job(filepath=path, model_name="RandomForestV1")
             self.current_jobs[str(job_id)] = [key, -1]
             
             #Spin up thread to process
-            scan_thread = threading.Thread(target=self.execute_job, args=(job_id, key, file_path))
+            scan_thread = threading.Thread(target=self.execute_job, args=(job_id, key, file_name))
             scan_thread.start()
 
         return job_id
     
-    def execute_job(self, job_id: int, key: int, file_path: str):
+    def execute_job(self, job_id: int, key: int, file_name: str):
         with self.locks["scan"]:
             result = self.scanner.runmodel(jobId=job_id)
+            #Remove tmp file
+            path = TMP_FOLDER + str(key) + "/" + file_name
+            tmpFile = Path(path + file_name)
+            path.unlink()
+
+            directory = Path(path)
+            if os.listdir(directory) == []:
+                #Delete folder if it's the last file
+                directory.unlink()
+            
+
             length = len(result["Classification"]) - 1
             if result["Confidence"].any() == "Unknown":
                 conf = -1
@@ -134,7 +152,7 @@ class VaaGovernor:
                 else:
                     conf = result["Confidence"][length][1] * 100
 
-            id = sql.add_to_scans(user=self.get_username(key=key), path=file_path, result=bool(result["Classification"][length]), confidence=conf)
+            id = sql.add_to_scans(user=self.get_username(key=key), path=file_name, result=bool(result["Classification"][length]), confidence=conf)
         
             self.current_jobs[str(job_id)][1] = id
     
@@ -148,7 +166,8 @@ class VaaGovernor:
             if str(job_id) not in self.current_jobs:
                 return {"Status": "No job for you by that number"}
             
-            if self.current_jobs[str(job_id)] != key:
+
+            if self.current_jobs[str(job_id)][0] != key:
                 return {"Status": "No job for you by that number"}
             
             #Job belongs to this user
@@ -168,7 +187,7 @@ class VaaGovernor:
             confid = job_res[2]
 
         #Return result
-        return {"Classification":job_res[1], "Confidence":confid, "file_path": job_res[0]}
+        return {"Classification":job_res[1], "Confidence":confid, "file_name": job_res[0]}
 
     def query_scan_db(self, filter, key, perm_level):
         if self.verify_session(key, perm_level) == False:
