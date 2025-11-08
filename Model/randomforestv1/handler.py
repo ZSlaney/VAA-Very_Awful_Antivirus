@@ -25,5 +25,5 @@ class Model(ModelInterface):
 
         print(prediction)
         print(conf)
-        res = {"Classification": prediction, "Confidence": "Unknown"}
+        res = {"Classification": prediction, "Confidence": conf}
         return res

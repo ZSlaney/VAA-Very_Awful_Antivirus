@@ -125,12 +125,16 @@ class VaaGovernor:
     def execute_job(self, job_id: int, key: int, file_path: str):
         with self.locks["scan"]:
             result = self.scanner.runmodel(jobId=job_id)
-            if result["Confidence"] == "Unknown":
+            length = len(result["Classification"]) - 1
+            if result["Confidence"].any() == "Unknown":
                 conf = -1
             else:
-                conf = result["Confidence"]
+                if (result["Classification"][length] == 0): #benignware
+                    conf = result["Confidence"][length][0] * 100
+                else:
+                    conf = result["Confidence"][length][1] * 100
 
-            id = sql.add_to_scans(user=self.get_username(key=key), path=file_path, result=bool(result["Classification"][0]), confidence=conf)
+            id = sql.add_to_scans(user=self.get_username(key=key), path=file_path, result=bool(result["Classification"][length]), confidence=conf)
         
             self.current_jobs[str(job_id)][1] = id
     
