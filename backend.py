@@ -8,13 +8,10 @@ import os
 from pydantic import BaseModel, ValidationError
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta
-import shutil
 from typing import List
 
 
 frontenddir = os.path.join(os.path.dirname(__file__), "frontend/dist")
-
-TMP_FOLDER = os.path.dirname(os.path.abspath(__file__)) + "/tmp/"
 
 ENABLE_DOCS = True
 
@@ -126,15 +123,11 @@ async def scan_file(
     print(f"Received perm_level: {perm_level}")
     print(f"Received file: {file.filename}")
 
+
     if key == None:
         return{"Auth":"Failed"}
-
-    #return {"Path": TMP_FOLDER + str(key) + "/" +  file.filename}
-    os.mkdir(TMP_FOLDER + str(key))
-    with open(TMP_FOLDER + str(key) + "/" + file.filename, "xb") as file_object:
-        shutil.copyfileobj(file.file, file_object)
-
-    job = governor.scan(file_name=  file.filename, key=key, perm_level=perm_level)
+    
+    job = governor.scan(file=file, key=int(key), perm_level=int(perm_level))
     if (job == False):
         #bad login or auth
         return JSONResponse(content={"Auth":"Failed"})

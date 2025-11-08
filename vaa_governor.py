@@ -10,6 +10,10 @@ from Model import Model_Handler as model
 #from pystray import Icon as icon, Menu as menu, MenuItem as item
 import ssl
 from pathlib import Path
+from fastapi import File, UploadFile
+import shutil
+
+
 CERTPATH = os.path.abspath("./cert")
 
 TMP_FOLDER = os.path.dirname(os.path.abspath(__file__)) + "/tmp/"
@@ -110,37 +114,47 @@ class VaaGovernor:
     
         return ""
     
-    def scan(self, file_name, key, perm_level):
+    def scan(self, file: UploadFile, key, perm_level):
         
-        path = Path(TMP_FOLDER + str(key) + "/" + file_name)
 
         if self.verify_session(key, perm_level) == False:
-            path.unlink()    
             return False
-        
         #valid session
+        
+        
+        path = Path(TMP_FOLDER + str(key) + "/" + file.filename)
+        
+        if os.path.isdir(TMP_FOLDER + str(key) + "/") == False:
+            #Create folder
+            os.mkdir(TMP_FOLDER + str(key))
+       
+
+        with open(TMP_FOLDER + str(key) + "/" + file.filename, "xb") as file_object:
+            shutil.copyfileobj(file.file, file_object)
+
+        
         with self.locks["scan"]:
             job_id = self.scanner.add_job(filepath=path, model_name="RandomForestV1")
             self.current_jobs[str(job_id)] = [key, -1]
             
             #Spin up thread to process
-            scan_thread = threading.Thread(target=self.execute_job, args=(job_id, key, file_name))
+            scan_thread = threading.Thread(target=self.execute_job, args=(job_id, key, file))
             scan_thread.start()
 
         return job_id
     
-    def execute_job(self, job_id: int, key: int, file_name: str):
+    def execute_job(self, job_id: int, key: int, file: UploadFile):
         with self.locks["scan"]:
             result = self.scanner.runmodel(jobId=job_id)
             #Remove tmp file
-            path = TMP_FOLDER + str(key) + "/" + file_name
-            tmpFile = Path(path + file_name)
-            path.unlink()
+            path = TMP_FOLDER + str(key)
+            tmpFile = Path(path + "/" + file.filename)
+            tmpFile.unlink(True)
 
             directory = Path(path)
             if os.listdir(directory) == []:
                 #Delete folder if it's the last file
-                directory.unlink()
+                directory.rmdir()
             
 
             length = len(result["Classification"]) - 1
@@ -152,7 +166,7 @@ class VaaGovernor:
                 else:
                     conf = result["Confidence"][length][1] * 100
 
-            id = sql.add_to_scans(user=self.get_username(key=key), path=file_name, result=bool(result["Classification"][length]), confidence=conf)
+            id = sql.add_to_scans(user=self.get_username(key=key), path=file.filename, result=bool(result["Classification"][length]), confidence=conf)
         
             self.current_jobs[str(job_id)][1] = id
     
