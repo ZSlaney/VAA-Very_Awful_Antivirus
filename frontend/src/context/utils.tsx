@@ -58,7 +58,7 @@ export function clearAuth(): void {
 export function issueScanRequest(filepath: string): Promise<any> {
   const sessionKey = getSessionKey();
   const perm_level = getPermLevel();
-  return fetch('/api/scan', {
+  return fetch('/api/scan/add', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -74,3 +74,59 @@ export function issueScanRequest(filepath: string): Promise<any> {
     });
 }
 
+export function findScanResult(job_id: number): Promise<any> {
+  const sessionKey = getSessionKey();
+  const perm_level = getPermLevel();
+  return fetch('/api/scan/result', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ job_id, key: sessionKey, perm_level}),
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error('Job search failed');
+      }
+
+      const result = response.json();
+      return result;
+    });
+}
+
+export function queryScanDB(filter: JSON): Promise<any> {
+  const sessionKey = getSessionKey();
+  const perm_level = getPermLevel();
+  return fetch('/api/scan/result', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ filter, key: sessionKey, perm_level}),
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error('Scan DB search failed');
+      }
+      
+      const result = response.json();
+      return result;
+    });
+}
+
+export function get_version_uptime(): Promise<any> {
+  return fetch('/api/version', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error('Version and Uptime failed');
+      }
+      
+      const result = response.json();
+      return result;
+    });
+}

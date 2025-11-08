@@ -52,15 +52,12 @@ async def list_clients(governor=Depends(get_governor)):
 
 @app.get("/api/version")
 async def get_api_version():
-    return {"Version":app.version, "VAA Build":"1.0"}
-
-@app.get("/api/uptime")
-async def get_uptime():
     if startup_time:
         uptime_duration: timedelta = datetime.now() - startup_time
-        return {"uptime": str(uptime_duration)}
+        return {"Version":app.version, "VAA Build":"1.0", "uptime": str(uptime_duration)}
     else:
-        return {"uptime": "Application startup time not recorded."}
+        return {"Version":app.version, "VAA Build":"1.0", "uptime": "Application startup time not recorded."}
+
 
 class ScanDatabase(BaseModel):
     filter: dict
