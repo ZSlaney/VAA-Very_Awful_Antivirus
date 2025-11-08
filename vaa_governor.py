@@ -21,9 +21,11 @@ class VaaGovernor:
         self.locks = {
             "auth": threading.Lock(),
             "scan": threading.Lock(),
-            "db": threading.Lock()
+            "db": threading.Lock(),
+            "client": threading.Lock()
         }
         self.scanner = model.ModelHandler()
+        self.current_jobs = {}
 
     def start(self):
         self.sslContext = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
@@ -80,7 +82,9 @@ class VaaGovernor:
             return [res[0], res[1], key]
     
     def verify_session(self, key, perm_level):
-        clients = self.list_clients()
+        with self.locks["client"]:
+            clients = self.list_clients()
+        
         for client in clients:
             if key == client[0]:
                 #valid user
@@ -90,11 +94,13 @@ class VaaGovernor:
                 else:
                     break
         
-        #No session  or altered data      
+        #No session or altered data      
         return False
 
     def get_username(self, key):
-        clients = self.list_clients()
+        with self.locks["client"]:
+            clients = self.list_clients()
+        
         for client in clients:
             if key == client[0]:
                 return client[1]
@@ -104,24 +110,66 @@ class VaaGovernor:
     def scan(self, file_path, key, perm_level):
         if self.verify_session(key, perm_level) == False:
             return False
-        #valid session
-        job_id = self.scanner.add_job(filepath=file_path, model_name="RandomForestV1")
-        result = self.scanner.runmodel(jobId=job_id)
         
-        if result["Confidence"] == "Unknown":
-            conf = -1
-        else:
-            conf = result["Confidence"]
+        #valid session
+        with self.locks["scan"]:
+            job_id = self.scanner.add_job(filepath=file_path, model_name="RandomForestV1")
+            self.current_jobs[str(job_id)] = [key, -1]
+            
+            #Spin up thread to process
+            scan_thread = threading.Thread(target=self.execute_job, args=(job_id, key, file_path))
+            scan_thread.start()
 
-        sql.add_to_scans(user=self.get_username(key=key), path=file_path, result=bool(result["Classification"]), confidence=conf)
-        return result
+        return job_id
     
+    def execute_job(self, job_id: int, key: int, file_path: str):
+        with self.locks["scan"]:
+            result = self.scanner.runmodel(jobId=job_id)
+            if result["Confidence"] == "Unknown":
+                conf = -1
+            else:
+                conf = result["Confidence"]
+
+            id = sql.add_to_scans(user=self.get_username(key=key), path=file_path, result=bool(result["Classification"][0]), confidence=conf)
+        
+            self.current_jobs[str(job_id)][1] = id
+    
+    def get_job(self, job_id, key, perm_level):
+        if self.verify_session(key, perm_level) == False:
+            return False
+        #valid session 
+
+        with self.locks["scan"]:
+            #Check job belongs to this user
+            # if self.current_jobs[str(job_id)] != key:
+            #     return False
+            
+            #Job belongs to this user
+            
+            #Check if scan complete
+            if self.current_jobs[str(job_id)][1] == -1:
+                return {"Status": "Scan incomplete"}
+            
+            job_res = sql.read_scans_by_pkey(self.current_jobs[str(job_id)][1])
+
+            #Clear job & stored result
+            del(self.current_jobs[str(job_id)])
+
+        if job_res[2] == -1:
+            confid = "UNKNOWN"
+        else:
+            confid = job_res[2]
+
+        #Return result
+        return {"Classification":job_res[1], "Confidence":confid, "file_path": job_res[0]}
+
     def query_scan_db(self, filter, key, perm_level):
         if self.verify_session(key, perm_level) == False:
             return False
-        
         #valid session
-        res = sql.read_scans(self.get_username(key=key)) 
+        
+        with self.locks["scan"]:
+            res = sql.read_scans(self.get_username(key=key)) 
         
         #Sort newest to oldest
         res.reverse()

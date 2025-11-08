@@ -60,6 +60,7 @@ class Processor:
             pe = pefile.PE(file_path)
             #hash the file for id
             file_hash = hash_file(file_path)
+            
             filedlls = self.getDLLs(pe)
             fileheader = self.getHeader(pe)
             filesections = self.getSections(pe)
@@ -150,7 +151,7 @@ class Processor:
 
     def dict_to_pandas(self):
         # Create DataFrame with four columns to hold raw structures
-        columns = ["SHA256"] + self.foundheaderattributes + self.foundsectionattributes + self.founddlls
+        columns = ["SHA256"] + PE_HeaderImportantFeatures + PE_SectionImportantFeatures + trained_dlls
         #print(f"Creating DataFrame with columns: {columns}")
         op = pd.DataFrame(columns=columns)
 
@@ -159,8 +160,8 @@ class Processor:
             header = data.get("Header", {})
             sections = data.get("Sections", {})
 
-            row = [file_hash] + [header.get(attr, 0) for attr in self.foundheaderattributes] + \
-                [sections.get(attr, 0) for attr in self.foundsectionattributes] + [1 if dll in dlls else 0 for dll in self.founddlls]
+            row = [file_hash] + [header.get(attr, 0) if attr in header else 0 for attr in PE_HeaderImportantFeatures] + \
+                [sections.get(attr, 0) if attr in sections else 0 for attr in PE_SectionImportantFeatures] + [1 if dll in dlls else 0 for dll in trained_dlls]
             op.loc[len(op)] = row
 
         return op
@@ -170,13 +171,16 @@ class Processor:
     def ensure_columns(self, df: pd.DataFrame) -> pd.DataFrame:
         # Ensure all trained DLL columns are present
         missing_dlls = [dll for dll in trained_dlls if dll not in df.columns]
+
+       
         if missing_dlls:
             # Create a DataFrame with missing columns initialized to 0
             missing_df = pd.DataFrame(0, index=df.index, columns=missing_dlls)
             # Concatenate the new columns to the original DataFrame
             df = pd.concat([df, missing_df], axis=1)
 
-        # Delete any extra DLL columns not in trained DLLs
+
+        # Delete any extra columns not in training dataset
         valid_columns = set(trained_dlls + PE_HeaderImportantFeatures + PE_SectionImportantFeatures + ["SHA256"])
         extra_columns = [col for col in df.columns if col not in valid_columns]
         if extra_columns:
@@ -198,8 +202,8 @@ class Processor:
 if __name__ == "__main__":
     # Example usage
     processor = Processor()
-    file_path = "./ACCICONS.EXE/"
+    file_path = "/home/zach-slaney/Downloads/alg.exe"
     file_path = os.path.abspath(file_path)
-    df =processor.execute(file_path)
+    df = processor.execute(file_path)
     #save to csv
     df.to_csv("pe_features.csv", index=False)

@@ -24,11 +24,26 @@ app = FastAPI(lifespan=lifespan)
 def get_governor():
     return app.state.governor
 
-#API routes
+
+
+
+
+
+#--------------------------------------------------------
+#                   API ROUTES
+#--------------------------------------------------------
+
+#---------------TESTING---------------
+#Remove before production
+
+
 # API route to list clients
 @app.get("/api/clients")
 async def list_clients(governor=Depends(get_governor)):
     return {"clients": governor.list_clients()}
+
+
+#-----------PERMINENT------------------
 
 @app.get("/api/version")
 async def get_api_version():
@@ -85,14 +100,35 @@ class ScanRequest(BaseModel):
 @app.post("/api/scan/add")
 async def scan_file(request: ScanRequest, governor=Depends(get_governor)):
     
-    result = governor.scan(file_path=request.file_path, key=request.key, perm_level=request.perm_level)
+    job = governor.scan(file_path=request.file_path, key=request.key, perm_level=request.perm_level)
+    if (job == False):
+        #bad login or auth
+        return JSONResponse(content={"Auth":"Failed"})
+    
+    return {"Job Id": job}
+    
+
+class JobRequest(BaseModel):
+    job_id: int
+    key: int
+    perm_level: int
+
+@app.post("/api/scan/result")
+async def find_job(job_request: JobRequest, governor=Depends(get_governor)):
+    
+    result = governor.get_job(job_id=job_request.job_id, key=job_request.key, perm_level=job_request.perm_level)
+    
     if (result == False):
         #bad login or auth
         return JSONResponse(content={"Auth":"Failed"})
-    classif = result["Classification"]
-    confid = result["Confidence"]
-    scan_result = {"file_path": request.file_path, "thread_found": bool(classif), "confidence_level": confid}
+    
+    if "Status" in result:
+        #not ready yet
+        return result
+    
+    scan_result = {"file_path": result["file_path"], "thread_found": bool(result["Classification"]), "confidence_level": result["Confidence"]}
     return JSONResponse(content=scan_result)
+
 
 class LoginRequest(BaseModel):
     username: str

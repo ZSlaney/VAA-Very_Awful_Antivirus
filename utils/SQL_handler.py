@@ -73,9 +73,11 @@ def add_to_scans(user, path, result, confidence):
         )
     ''')
 
-    cursor.execute('''INSERT INTO scans (user, path, result, confidence) VALUES ((?), (?), (?), (?))''', (user, path, result, confidence))
+    cursor.execute('''INSERT INTO scans (user, path, result, confidence) VALUES ((?), (?), (?), (?)) RETURNING id''', (user, path, result, confidence))
+    p_id = cursor.fetchall()
     db.commit()
     db.close()
+    return p_id[0]
 
 def read_scans(user):
     db = sqlite3.connect('./databases/scans.db')
@@ -96,6 +98,14 @@ def read_scans(user):
     actions = cursor.fetchall()
     db.close()
     return actions
+
+def read_scans_by_pkey(in_id: int):
+    db = sqlite3.connect('./databases/scans.db')
+    cursor = db.cursor()
+    cursor.execute('''SELECT path, result, confidence FROM scans WHERE id=(?)''', (in_id))
+    actions = cursor.fetchall()
+    db.close()
+    return actions[0]
 
 
 #------------------------------------------------
