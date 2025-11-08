@@ -25,11 +25,17 @@ import SideDrawer from '../components/Navigation';
 import { DEBUG, type PageType } from '../App';
 import JobsList from '../components/JobsTable';
 import { getSessionKey } from '../context/utils';
+import SmallTabBar from '../components/SmallTabBar';
+import { get_version_uptime } from '../context/utils';
 
-
-export default function FilesExample({setPage}: {setPage: React.Dispatch<React.SetStateAction<PageType>>}) {
+export default function Dashboard({ setPage }: { setPage: React.Dispatch<React.SetStateAction<PageType>> }) {
   const [drawerOpen, setDrawerOpen] = React.useState(false);
-  
+  const [systemStats, setSystemStats] = React.useState({
+    systemUptime: '00:00:00',
+    version: 'Idle',
+    build: 'None',
+  });
+
   //if session key is invalid, redirect to login page
   if (DEBUG) {
     console.log('Rendering Dashboard component');
@@ -38,11 +44,34 @@ export default function FilesExample({setPage}: {setPage: React.Dispatch<React.S
     const sessionKey = getSessionKey();
     const isValidSession = sessionKey !== null && sessionKey !== undefined && sessionKey !== '';
     if (!isValidSession) {
-      
+
       setPage('login');
     }
   }
-  
+  const updateSystemStats = () => {
+    const systemStats = get_version_uptime()
+        .then((data) => {
+          let uptime = data.uptime.split(':');
+          uptime[2] = parseFloat(parseFloat(uptime[2]).toFixed(2)).toString();//remove all but 2 decimal places from seconds
+          const formattedUptime = `${uptime[0]}h ${uptime[1]}m ${uptime[2]}s`;
+          data.uptime = formattedUptime;
+          setSystemStats({
+            systemUptime: data.uptime,
+            version: data.Version,
+            build: data["VAA Build"],
+          });
+        });
+  }
+  React.useEffect(() => {
+    updateSystemStats();
+    const int = setInterval(() => {
+      //refreh dash data every 10 seconds
+      updateSystemStats();
+    }, 10000);
+    return () => {
+      clearInterval(int);
+    };
+  }, []);
   return (
     <CssVarsProvider disableTransitionOnChange>
       <CssBaseline />
@@ -51,70 +80,7 @@ export default function FilesExample({setPage}: {setPage: React.Dispatch<React.S
           <SideDrawer />
         </Layout.SideDrawer>
       )}
-      <Stack
-        id="tab-bar"
-        direction="row"
-        spacing={1}
-        sx={{
-          justifyContent: 'space-around',
-          display: { xs: 'flex', sm: 'none' },
-          zIndex: '999',
-          bottom: 0,
-          position: 'fixed',
-          width: '100dvw',
-          py: 2,
-          backgroundColor: 'background.body',
-          borderTop: '1px solid',
-          borderColor: 'divider',
-        }}
-      >
-        <Button
-          variant="plain"
-          color="neutral"
-          component="a"
-          href="/joy-ui/getting-started/templates/email/"
-          size="sm"
-          startDecorator={<EmailRoundedIcon />}
-          sx={{ flexDirection: 'column', '--Button-gap': 0 }}
-        >
-          Dashboard
-        </Button>
-        <Button
-          variant="plain"
-          color="neutral"
-          component="a"
-          href="/joy-ui/getting-started/templates/team/"
-          size="sm"
-          startDecorator={<PeopleAltRoundedIcon />}
-          sx={{ flexDirection: 'column', '--Button-gap': 0 }}
-        >
-          Analytics
-        </Button>
-        <Button
-          variant="plain"
-          color="neutral"
-          aria-pressed="true"
-          component="a"
-          href="/joy-ui/getting-started/templates/files/"
-          size="sm"
-          startDecorator={<FolderRoundedIcon />}
-          sx={{ flexDirection: 'column', '--Button-gap': 0 }}
-        >
-          Scan Tool
-        </Button>
-        <Button
-          variant="plain"
-          color="neutral"
-          aria-pressed="true"
-          component="a"
-          href="/joy-ui/getting-started/templates/files/"
-          size="sm"
-          startDecorator={<FolderRoundedIcon />}
-          sx={{ flexDirection: 'column', '--Button-gap': 0 }}
-        >
-          About Us
-        </Button>
-      </Stack>
+      <SmallTabBar />
       <Layout.Root
         sx={[
           {
@@ -157,21 +123,21 @@ export default function FilesExample({setPage}: {setPage: React.Dispatch<React.S
               <Grid container spacing={2} sx={{ p: 2, flexGrow: 1 }}>
                 <Grid xs={12} sm={3}>
                   <Typography level="body-sm" sx={{ color: 'text.secondary' }}>
-                    System
+                    System Uptime
                   </Typography>
-                  <Typography level="title-lg" color='success'>Healthy</Typography>
+                  <Typography level="title-lg">{systemStats.systemUptime}</Typography>
                 </Grid>
                 <Grid xs={12} sm={3}>
                   <Typography level="body-sm" sx={{ color: 'text.secondary' }}>
                     AI Core System
                   </Typography>
-                  <Typography level="title-lg">Idle</Typography>
+                  <Typography level="title-lg" >none</Typography>
                 </Grid>
                 <Grid xs={12} sm={3}>
                   <Typography level="body-sm" sx={{ color: 'text.secondary' }}>
                     Alerts
                   </Typography>
-                  <Typography level="title-lg" color='success'>None</Typography>
+                  <Typography level="title-lg">none</Typography>
                 </Grid>
               </Grid>
             </Sheet>
@@ -195,7 +161,7 @@ export default function FilesExample({setPage}: {setPage: React.Dispatch<React.S
                   <Typography level="body-sm" sx={{ color: 'text.secondary' }}>
                     System Uptime
                   </Typography>
-                  <Typography level="title-lg" color='success'>Healthy</Typography>
+                  <Typography level="title-lg" color='success'>{systemStats.systemUptime}</Typography>
                 </Grid>
                 <Grid xs={4} sm={4}>
                   <Typography level="body-sm" sx={{ color: 'text.secondary' }}>
@@ -314,187 +280,6 @@ export default function FilesExample({setPage}: {setPage: React.Dispatch<React.S
 
           </Box>
         </Layout.Main>
-        {/* Right drawer
-        <Sheet
-          sx={{
-            display: { xs: 'none', sm: 'initial' },
-            borderLeft: '1px solid',
-            borderColor: 'divider',
-          }}
-        >
-          <Box sx={{ p: 2, display: 'flex', alignItems: 'center' }}>
-            <Typography level="title-md" sx={{ flex: 1 }}>
-              torres-del-paine.png
-            </Typography>
-            <IconButton component="span" variant="plain" color="neutral" size="sm">
-              <CloseRoundedIcon />
-            </IconButton>
-          </Box>
-          <Divider />
-          <Tabs>
-            <TabList>
-              <Tab sx={{ flexGrow: 1 }}>
-                <Typography level="title-sm">Details</Typography>
-              </Tab>
-              <Tab sx={{ flexGrow: 1 }}>
-                <Typography level="title-sm">Activity</Typography>
-              </Tab>
-            </TabList>
-            <TabPanel value={0} sx={{ p: 0 }}>
-              <AspectRatio ratio="21/9">
-                <img
-                  alt=""
-                  src="https://images.unsplash.com/photo-1534067783941-51c9c23ecefd?w=400&h=400&auto=format"
-                  srcSet="https://images.unsplash.com/photo-1534067783941-51c9c23ecefd?w=400&h=400&auto=format&dpr=2 2x"
-                />
-              </AspectRatio>
-              <Box sx={{ p: 2, display: 'flex', gap: 1, alignItems: 'center' }}>
-                <Typography level="title-sm" sx={{ mr: 1 }}>
-                  Shared with
-                </Typography>
-                <AvatarGroup size="sm" sx={{ '--Avatar-size': '24px' }}>
-                  <Avatar
-                    src="https://i.pravatar.cc/24?img=6"
-                    srcSet="https://i.pravatar.cc/48?img=6 2x"
-                  />
-                  <Avatar
-                    src="https://i.pravatar.cc/24?img=7"
-                    srcSet="https://i.pravatar.cc/48?img=7 2x"
-                  />
-                  <Avatar
-                    src="https://i.pravatar.cc/24?img=8"
-                    srcSet="https://i.pravatar.cc/48?img=8 2x"
-                  />
-                  <Avatar
-                    src="https://i.pravatar.cc/24?img=9"
-                    srcSet="https://i.pravatar.cc/48?img=9 2x"
-                  />
-                </AvatarGroup>
-              </Box>
-              <Divider />
-              <Box
-                sx={{
-                  gap: 2,
-                  p: 2,
-                  display: 'grid',
-                  gridTemplateColumns: 'auto 1fr',
-                  '& > *:nth-child(odd)': { color: 'text.secondary' },
-                }}
-              >
-                <Typography level="title-sm">Type</Typography>
-                <Typography level="body-sm" textColor="text.primary">
-                  Image
-                </Typography>
-                <Typography level="title-sm">Size</Typography>
-                <Typography level="body-sm" textColor="text.primary">
-                  3,6 MB (3,258,385 bytes)
-                </Typography>
-                <Typography level="title-sm">Location</Typography>
-                <Typography level="body-sm" textColor="text.primary">
-                  Travel pictures
-                </Typography>
-                <Typography level="title-sm">Owner</Typography>
-                <Typography level="body-sm" textColor="text.primary">
-                  Michael Scott
-                </Typography>
-                <Typography level="title-sm">Modified</Typography>
-                <Typography level="body-sm" textColor="text.primary">
-                  26 October 2016
-                </Typography>
-                <Typography level="title-sm">Created</Typography>
-                <Typography level="body-sm" textColor="text.primary">
-                  5 August 2016
-                </Typography>
-              </Box>
-              <Divider />
-              <Box sx={{ py: 2, px: 1 }}>
-                <Button variant="plain" size="sm" endDecorator={<EditRoundedIcon />}>
-                  Add a description
-                </Button>
-              </Box>
-            </TabPanel>
-            <TabPanel
-              value={1}
-              sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}
-            >
-              <Typography level="title-md">This week</Typography>
-              <Box sx={{ display: 'flex', gap: 1 }}>
-                <Avatar
-                  size="sm"
-                  src="https://i.pravatar.cc/24?img=2"
-                  srcSet="https://i.pravatar.cc/48?img=2 2x"
-                />
-                <div>
-                  <Box
-                    sx={{ display: 'flex', gap: 0.5, alignItems: 'center', mb: 1 }}
-                  >
-                    <Typography level="title-sm" sx={{ alignItems: 'center' }}>
-                      You
-                    </Typography>
-                    <Typography level="body-sm">shared</Typography>
-                    <Typography level="title-sm">torres-del-paine.png</Typography>
-                  </Box>
-                  <Chip variant="outlined" startDecorator={<ShareRoundedIcon />}>
-                    Shared with 3 users
-                  </Chip>
-                  <Typography level="body-xs" sx={{ mt: 1 }}>
-                    3 Nov 2023
-                  </Typography>
-                </div>
-              </Box>
-              <Typography level="title-md">Older</Typography>
-              <Box sx={{ display: 'flex', gap: 1 }}>
-                <Avatar
-                  size="sm"
-                  src="https://i.pravatar.cc/24?img=2"
-                  srcSet="https://i.pravatar.cc/48?img=2 2x"
-                />
-                <div>
-                  <Box
-                    sx={{ display: 'flex', gap: 0.5, alignItems: 'center', mb: 1 }}
-                  >
-                    <Typography level="title-sm" sx={{ alignItems: 'center' }}>
-                      You
-                    </Typography>
-                    <Typography level="body-sm">edited</Typography>
-                    <Typography level="title-sm">torres-del-paine.png</Typography>
-                  </Box>
-                  <Chip variant="outlined" startDecorator={<EditRoundedIcon />}>
-                    Changed name
-                  </Chip>
-                  <Typography level="body-xs" sx={{ mt: 1 }}>
-                    12 Apr 2021
-                  </Typography>
-                </div>
-              </Box>
-              <Box sx={{ display: 'flex', gap: 1 }}>
-                <Avatar
-                  size="sm"
-                  src="https://i.pravatar.cc/24?img=2"
-                  srcSet="https://i.pravatar.cc/48?img=2 2x"
-                />
-                <div>
-                  <Box
-                    sx={{ display: 'flex', gap: 0.5, alignItems: 'center', mb: 1 }}
-                  >
-                    <Typography level="title-sm" sx={{ alignItems: 'center' }}>
-                      You
-                    </Typography>
-                    <Typography level="body-sm">created</Typography>
-                    <Typography level="title-sm">torres-del-paine.png</Typography>
-                  </Box>
-                  <Chip variant="outlined" startDecorator={<EditRoundedIcon />}>
-                    Added 5 Apr 2021
-                  </Chip>
-                  <Typography level="body-xs" sx={{ mt: 1 }}>
-                    12 Apr 2021
-                  </Typography>
-                </div>
-              </Box>
-            </TabPanel>
-          </Tabs>
-        </Sheet>
-         */}
       </Layout.Root>
     </CssVarsProvider>
   );

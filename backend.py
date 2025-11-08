@@ -116,17 +116,25 @@ def checker(data: str = Form(...)):
 
 
 @app.post("/api/scan/add")
-async def scan_file(request: ScanRequest = Depends(checker), up_file: UploadFile = File(...), governor=Depends(get_governor)):
-    
-    if request.key == None:
+async def scan_file(
+    key: str = Form(...),  # Receive `key` as a form field
+    perm_level: str = Form(...),  # Receive `perm_level` as a form field
+    file: UploadFile = File(...),  # Receive the file
+    governor=Depends(get_governor)
+):
+    print(f"Received key: {key}")
+    print(f"Received perm_level: {perm_level}")
+    print(f"Received file: {file.filename}")
+
+    if key == None:
         return{"Auth":"Failed"}
-    
-    #return {"Path": TMP_FOLDER + str(request.key) + "/" + up_file.filename}
-    os.mkdir(TMP_FOLDER + str(request.key))
-    with open(TMP_FOLDER + str(request.key) + "/" + up_file.filename, "xb") as file_object:
-        shutil.copyfileobj(up_file.file, file_object)
-    
-    job = governor.scan(file_name=up_file.filename, key=request.key, perm_level=request.perm_level)
+
+    #return {"Path": TMP_FOLDER + str(key) + "/" +  file.filename}
+    os.mkdir(TMP_FOLDER + str(key))
+    with open(TMP_FOLDER + str(key) + "/" + file.filename, "xb") as file_object:
+        shutil.copyfileobj(file.file, file_object)
+
+    job = governor.scan(file_name=  file.filename, key=key, perm_level=perm_level)
     if (job == False):
         #bad login or auth
         return JSONResponse(content={"Auth":"Failed"})

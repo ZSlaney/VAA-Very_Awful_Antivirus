@@ -130,3 +130,38 @@ export function get_version_uptime(): Promise<any> {
       return result;
     });
 }
+
+
+
+export function getCurrentJob(): any {
+  const jobnumber = sessionStorage.getItem('vaa-currentJob');
+  return jobnumber
+}
+
+export function setCurrentJob(jobnumber: string | null): void {
+  if (jobnumber) {
+    sessionStorage.setItem('vaa-currentJob', jobnumber);
+  } else {
+    sessionStorage.removeItem('vaa-currentJob');
+  }
+}
+
+export function uploadFile(file: File, perm_level: string | null): Promise<any> {
+  const sessionKey = getSessionKey();
+  const formData = new FormData();
+  formData.append('key', sessionKey ? sessionKey : 'sdsd');
+  formData.append('perm_level', perm_level ? perm_level : 'adasdad');
+  formData.append('file', file);
+  console.log('Uploading file with session key:', formData);
+  return fetch('/api/scan/add', {
+    method: 'POST',
+    body: formData,
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error('File upload failed');
+      }
+      const result = response.json();
+      return result;
+    });
+}
