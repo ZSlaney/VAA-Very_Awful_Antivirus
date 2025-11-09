@@ -130,7 +130,7 @@ class JobRequest(BaseModel):
     key: int
     perm_level: int
 
-@app.post("/api/scan/result")
+@app.post("/api/scan/result/single")
 async def find_job(job_request: JobRequest, governor=Depends(get_governor)):
     
     result = governor.get_job(job_id=job_request.job_id, key=job_request.key, perm_level=job_request.perm_level)
@@ -139,12 +139,21 @@ async def find_job(job_request: JobRequest, governor=Depends(get_governor)):
         #bad login or auth
         return JSONResponse(content={"Auth":"Failed"})
     
-    if "Status" in result:
-        #not ready yet
-        return result
     
-    scan_result = {"file_name": result["file_name"], "thread_found": bool(result["Classification"]), "confidence_level": result["Confidence"]}
-    return JSONResponse(content=scan_result)
+    return JSONResponse(content=result)
+
+class JobsRequest(BaseModel):
+    key: int
+    perm_level: int
+@app.post("/api/scan/result/all")
+async def find_jobs(request: JobsRequest, governor=Depends(get_governor)):
+    result = governor.get_all_user_jobs(key=request.key, perm_level=request.perm_level)
+
+    if (result == False):
+        #bad login or auth
+        return JSONResponse(content={"Auth":"Failed"})
+    
+    return JSONResponse(content=result)
 
 
 class LoginRequest(BaseModel):
@@ -165,7 +174,15 @@ async def login(request: LoginRequest, governor=Depends(get_governor)):
         json_res = {"Key": "NONE", "Permission_Level": res[1]}
     
     return JSONResponse(content=json_res)
-    
+
+class NewUser(BaseModel):
+    username: str
+    password: str
+
+@app.post("/api/auth/new")
+async def new_user(request: NewUser, governor=Depends(get_governor)):
+    res = governor.new_user_account(username=request.username, password=request.password)
+    return JSONResponse(content=res)
 
 
 # Serve static files

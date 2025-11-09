@@ -197,6 +197,7 @@ class Processor:
         df = self.dict_to_pandas()
         df = self.ensure_columns(df)
         df.to_csv("pe_features.csv", index=False)
+        self.pes = {}
         return df
 
 if __name__ == "__main__":

@@ -12,6 +12,8 @@ import ssl
 from pathlib import Path
 from fastapi import File, UploadFile
 import shutil
+from datetime import datetime, timedelta
+import time
 
 
 CERTPATH = os.path.abspath("./cert")
@@ -32,7 +34,6 @@ class VaaGovernor:
             "client": threading.Lock()
         }
         self.scanner = model.ModelHandler()
-        self.current_jobs = {}
 
     def start(self):
         self.sslContext = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
@@ -43,6 +44,11 @@ class VaaGovernor:
         self.api_thread.start()
         self.logger.info("Web server started in a separate thread.")
         self.init_clisocket()
+        
+        self.logger.info("Starting cleaner thread.")
+        self.cleanse_thread = threading.Thread(target=self.cleanse_clients_and_jobs)
+        self.cleanse_thread.start()
+
         self.main_loop()
 
 
@@ -67,6 +73,7 @@ class VaaGovernor:
     def login(self, username: str, password: str):
         with self.locks["auth"]:
             self.logger.info("Login request recieved from " + username)
+
             res = sql.login(username, password)
 
             if res[0] == True:
@@ -78,7 +85,7 @@ class VaaGovernor:
                         #Key is not a duplicate
                         key =  candidate_key
                         valid_key = True
-                        self.clients.append([key, username, res[1]])  
+                        self.clients.append([key, username, res[1], datetime.now()])  
                         valid_key = True
             else:
                 #Invalid user
@@ -97,12 +104,18 @@ class VaaGovernor:
                 #valid user
                 if perm_level == client[2]:
                     #no variation - accept
+                    #update last seen
+                    
+                    client[3] = datetime.now()
+                    with self.locks["client"]:
+                        self.clients = clients
                     return True
                 else:
                     break
         
         #No session or altered data      
         return False
+    
 
     def get_username(self, key):
         with self.locks["client"]:
@@ -121,6 +134,8 @@ class VaaGovernor:
             return False
         #valid session
         
+        with self.locks["scan"]:
+            job_id = self.scanner.add_job(filename=file.filename, model_name="RandomForestV1", key=key)
         
         path = Path(TMP_FOLDER + str(key) + "/" + file.filename)
         
@@ -133,10 +148,8 @@ class VaaGovernor:
             shutil.copyfileobj(file.file, file_object)
 
         
-        with self.locks["scan"]:
-            job_id = self.scanner.add_job(filepath=path, model_name="RandomForestV1")
-            self.current_jobs[str(job_id)] = [key, -1]
-            
+        
+        with self.locks["scan"]:    
             #Spin up thread to process
             scan_thread = threading.Thread(target=self.execute_job, args=(job_id, key, file))
             scan_thread.start()
@@ -144,12 +157,18 @@ class VaaGovernor:
         return job_id
     
     def execute_job(self, job_id: int, key: int, file: UploadFile):
+        #Not called externally, cridentials do not need to be checked
+        print("running model")
         with self.locks["scan"]:
-            result = self.scanner.runmodel(jobId=job_id)
-            #Remove tmp file
             path = TMP_FOLDER + str(key)
             tmpFile = Path(path + "/" + file.filename)
-            tmpFile.unlink(True)
+            result = self.scanner.runmodel(jobId=job_id, path=tmpFile)
+            if (result == False):
+                print("Bad job id")
+                return
+
+            #Remove tmp file
+            tmpFile.unlink()
 
             directory = Path(path)
             if os.listdir(directory) == []:
@@ -157,18 +176,39 @@ class VaaGovernor:
                 directory.rmdir()
             
 
-            length = len(result["Classification"]) - 1
-            if result["Confidence"].any() == "Unknown":
-                conf = -1
-            else:
-                if (result["Classification"][length] == 0): #benignware
-                    conf = result["Confidence"][length][0] * 100
-                else:
-                    conf = result["Confidence"][length][1] * 100
+            if result["result"]["Confidence"].any() == "UNKNOWN":
+                result["result"]["Confidence"] = -1
+            
+            self.logger.info(result["hash"])
+            
+            sql.add_to_scans(user=self.get_username(key=key), path=file.filename, result=result["result"]["Classification"], confidence=result["result"]["Confidence"], hash=result["hash"])
 
-            id = sql.add_to_scans(user=self.get_username(key=key), path=file.filename, result=bool(result["Classification"][length]), confidence=conf)
-        
-            self.current_jobs[str(job_id)][1] = id
+    def get_all_user_jobs(self, key, perm_level):
+        if self.verify_session(key, perm_level) == False:
+            return False
+        #valid session
+
+        if (perm_level <= 2): #Admin 
+            with self.locks["scan"]:
+                scan_list = []   
+                res = self.scanner.get_jobs()
+                for result in res:
+                    if result["status"] == "pending":
+                        result["result"] = {"Classification":"IN PROGRESS", "Confidence": "IN PROGRESS"}
+                    else:
+                        if result["result"]["Confidence"] == -1:
+                            result["result"]["Confidence"] = "UNKNOWN"
+
+                            result["result"]["Classification"] = bool(result["result"]["Classification"])
+                    
+                    scan = {"id": result["id"],"filename": result["filename"], "hash": result["hash"],"status": result["status"],"result": result["result"], "timestamp": result["timestamp"].strftime("%H:%M:%S")}
+                    scan_list.append(scan)
+                return scan_list
+
+        else:
+            with self.locks["scan"]:    
+                return self.scanner.get_user_jobs(key=key)
+
     
     def get_job(self, job_id, key, perm_level):
         if self.verify_session(key, perm_level) == False:
@@ -176,32 +216,25 @@ class VaaGovernor:
         #valid session 
 
         with self.locks["scan"]:
-            #Check job belongs to this user
-            if str(job_id) not in self.current_jobs:
-                return {"Status": "No job for you by that number"}
             
+            job_res = self.scanner.get_job(job_id=job_id, key=key)
 
-            if self.current_jobs[str(job_id)][0] != key:
-                return {"Status": "No job for you by that number"}
-            
-            #Job belongs to this user
-            
-            #Check if scan complete
-            if self.current_jobs[str(job_id)][1] == -1:
-                return {"Status": "Scan incomplete"}
-            
-            job_res = sql.read_scans_by_pkey(self.current_jobs[str(job_id)][1])
-
-            #Clear job & stored result
-            del(self.current_jobs[str(job_id)])
-
-        if job_res[2] == -1:
-            confid = "UNKNOWN"
+        if job_res == False:
+            return {"status":"No job for you by that ID"}
+        
+        if job_res["status"] == "pending":
+            job_res["result"] = {"Classification":"IN PROGRESS", "Confidence": "IN PROGRESS"}
         else:
-            confid = job_res[2]
+            if job_res["result"]["Confidence"] == -1:
+                job_res["result"]["Confidence"] = "UNKNOWN"
+
+            job_res["result"]["Classification"] = bool(job_res["result"]["Classification"])
+
+        scan = {"id": job_res["id"],"filename": job_res["filename"], "hash": job_res["hash"],"status": job_res["status"],"result": job_res["result"], "timestamp": job_res["timestamp"].strftime("%H:%M:%S")}
+
 
         #Return result
-        return {"Classification":job_res[1], "Confidence":confid, "file_name": job_res[0]}
+        return scan
 
     def query_scan_db(self, filter, key, perm_level):
         if self.verify_session(key, perm_level) == False:
@@ -241,6 +274,39 @@ class VaaGovernor:
 
                 
         return res
+    
+    def new_user_account(self, username, password):
+        with self.locks["auth"]:
+            res = sql.newUser(username, password, 10)
+            if res == False:
+                return {"response": "Username already exists"}
+            else:
+                return {"response": "Success"}
+            
+    
+    def new_admin_account(self, username, password):
+        with self.locks["auth"]:
+            res = sql.newUser(username, password, 0)
+            if res == False:
+                return {"response": "Username already exists"}
+            else:
+                return {"response": "Success"}
+
+    
+    # Run on startup
+    def cleanse_clients_and_jobs(self):
+        USER_TIMEOUT_MINS = 60
+        while True:
+            self.scanner.remove_old_jobs()
+            for client in self.clients:
+                delta: timedelta = datetime.now() - client[3]
+                if delta.total_seconds() >= USER_TIMEOUT_MINS * 60:
+                    self.clients.remove(client)
+            
+            time.sleep(10)
+
+    
+
 
 
         

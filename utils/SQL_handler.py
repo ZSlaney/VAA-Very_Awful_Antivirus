@@ -7,6 +7,17 @@ def login(usrname, password):
     users = sqlite3.connect('./databases/users.db')
     u_cursor = users.cursor()
 
+    u_cursor.execute('''
+            CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY,
+                username TEXT,
+                salt TEXT,
+                pword TEXT,
+                perm_level INTEGER
+                )
+        ''')
+    users.commit()
+
     u_cursor.execute('''SELECT salt, pword, perm_level FROM users WHERE username=(?)''', (usrname,))
     rows = u_cursor.fetchall()
     for row in rows:
@@ -20,6 +31,67 @@ def login(usrname, password):
     #no valid user
     return [False, 255]
 
+def check_existing_username(username):
+    users = sqlite3.connect('./databases/users.db')
+    u_cursor = users.cursor()
+    
+    # Create a table
+    u_cursor.execute(''' SELECT name FROM sqlite_master WHERE type='table' AND name='{users}' ''')
+    exists = u_cursor.fetchall()
+    u_cursor.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY,
+            username TEXT,
+            salt TEXT,
+            pword TEXT,
+            perm_level INTEGER
+            )
+    ''')
+    users.commit()
+
+    u_cursor.execute('''SELECT salt, pword, perm_level FROM users WHERE username=(?)''', (username,))
+    rows = u_cursor.fetchall()
+    if rows != []:
+        print("username taken")
+        return False
+    
+    return True
+
+    
+def newUser(Username, Password, Permission_Level):
+    users = sqlite3.connect('./databases/users.db')
+    u_cursor = users.cursor()
+
+    u_cursor.execute('''
+            CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY,
+                username TEXT,
+                salt TEXT,
+                pword TEXT,
+                perm_level INTEGER
+                )
+        ''')
+    users.commit()
+    
+    if check_existing_username(username=Username) == False:
+        return False
+
+    salt = hash.gen_salt()
+    hash = hash.gen_hash(Password, salt)
+
+    if (Permission_Level < 0):
+        Permission_Level = 0
+    elif (Permission_Level > 20):
+        Permission_Level = 20
+
+    u_cursor.execute("INSERT INTO users (username, salt, pword, perm_level) VALUES (?, ?, ?, ?)", (Username, salt, hash, Permission_Level))
+
+
+    # Close the connection
+    users.commit()
+    users.close()
+
+    return True
 
 def add_to_quarantine(user, path, filename):
     db = sqlite3.connect('./databases/quar.db')
@@ -58,7 +130,7 @@ def read_quarantine(user):
     db.close()
     return actions
 
-def add_to_scans(user, path, result, confidence):
+def add_to_scans(user, path, result, confidence, hash):
     db = sqlite3.connect('./databases/scans.db')
     cursor = db.cursor()
 
@@ -69,11 +141,12 @@ def add_to_scans(user, path, result, confidence):
             user TEXT,
             path TEXT,
             result BOOLEAN,
-            confidence INTEGER
+            confidence INTEGER,
+            hash TEXT
         )
     ''')
 
-    cursor.execute('''INSERT INTO scans (user, path, result, confidence) VALUES ((?), (?), (?), (?)) RETURNING id''', (user, path, result, confidence))
+    cursor.execute('''INSERT INTO scans (user, path, result, confidence, hash) VALUES ((?), (?), (?), (?), (?)) RETURNING id''', (user, path, result, confidence, hash))
     p_id = cursor.fetchall()
     db.commit()
     db.close()
@@ -99,13 +172,6 @@ def read_scans(user):
     db.close()
     return actions
 
-def read_scans_by_pkey(in_id: int):
-    db = sqlite3.connect('./databases/scans.db')
-    cursor = db.cursor()
-    cursor.execute('''SELECT path, result, confidence FROM scans WHERE id=(?)''', (in_id))
-    actions = cursor.fetchall()
-    db.close()
-    return actions[0]
 
 
 #------------------------------------------------
@@ -150,7 +216,8 @@ def dump_scans_db():
             user TEXT,
             path TEXT,
             result BOOLEAN,
-            confidence INTEGER
+            confidence INTEGER,
+            hash TEXT
         )
     ''')
 
