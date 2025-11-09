@@ -84,9 +84,10 @@ async def scan_database(request: ScanDatabase, governor=Depends(get_governor)):
     for scan in res:
         #0-prim key
         #1-username
-        #2-path
+        #2-filename
         #3-result
         #4-confidence -- -1 means unknown
+        #5-hash
         if scan[4] == -1:
             conf = "Unknown"
         else:
@@ -97,7 +98,7 @@ async def scan_database(request: ScanDatabase, governor=Depends(get_governor)):
         else:
             res = "BENIGNWARE"
 
-        scan_entry = {"Path":scan[2], "Result":res, "Confidence":conf}
+        scan_entry = {"Filename":scan[2], "Result":{"Classification": res, "Confidence":conf}, "hash": conf[5]}
         full_scan_list.append(scan_entry)
 
     return JSONResponse(content=full_scan_list)

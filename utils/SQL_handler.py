@@ -163,7 +163,8 @@ def read_scans(user):
             user TEXT,
             path TEXT,
             result BOOLEAN,
-            confidence INTEGER
+            confidence INTEGER,
+            hash TEXT
         )
     ''')
     

@@ -199,7 +199,13 @@ class VaaGovernor:
                         if result["result"]["Confidence"] == -1:
                             result["result"]["Confidence"] = "UNKNOWN"
 
-                            result["result"]["Classification"] = bool(result["result"]["Classification"])
+                            
+                        if (result["result"]["Classification"] == True):
+                            result["result"]["Classification"] = "MALWARE"
+                        else:
+                            result["result"]["Classification"] = "BENIGNWARE"
+
+
                     
                     scan = {"id": result["id"],"filename": result["filename"], "hash": result["hash"],"status": result["status"],"result": result["result"], "timestamp": result["timestamp"].strftime("%H:%M:%S")}
                     scan_list.append(scan)
@@ -228,7 +234,11 @@ class VaaGovernor:
             if job_res["result"]["Confidence"] == -1:
                 job_res["result"]["Confidence"] = "UNKNOWN"
 
-            job_res["result"]["Classification"] = bool(job_res["result"]["Classification"])
+            if (job_res["result"]["Classification"] == True):
+                job_res["result"]["Classification"] = "MALWARE"
+            else:
+                job_res["result"]["Classification"] = "BENIGNWARE"
+            
 
         scan = {"id": job_res["id"],"filename": job_res["filename"], "hash": job_res["hash"],"status": job_res["status"],"result": job_res["result"], "timestamp": job_res["timestamp"].strftime("%H:%M:%S")}
 
@@ -251,9 +261,10 @@ class VaaGovernor:
             #Key for internal list
             #0-prim key
             #1-username
-            #2-path
+            #2-filename
             #3-result
             #4-confidence -- -1 means unknown
+            #5-Hash
 
         if "result" in filter:
             match filter["result"]:
