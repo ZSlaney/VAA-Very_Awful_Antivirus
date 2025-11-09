@@ -130,7 +130,7 @@ def read_quarantine(user):
     db.close()
     return actions
 
-def add_to_scans(user, path, result, confidence, hash):
+def add_to_scans(user, path, result, confidence, hash, timestamp, model):
     db = sqlite3.connect('./databases/scans.db')
     cursor = db.cursor()
 
@@ -142,11 +142,13 @@ def add_to_scans(user, path, result, confidence, hash):
             path TEXT,
             result BOOLEAN,
             confidence INTEGER,
-            hash TEXT
+            hash TEXT,
+            timestamp TEXT,
+            model TEXT
         )
     ''')
 
-    cursor.execute('''INSERT INTO scans (user, path, result, confidence, hash) VALUES ((?), (?), (?), (?), (?)) RETURNING id''', (user, path, result, confidence, hash))
+    cursor.execute('''INSERT INTO scans (user, path, result, confidence, hash, timestamp, model) VALUES ((?), (?), (?), (?), (?), (?), (?)) RETURNING id''', (user, path, result, confidence, hash, timestamp, model))
     p_id = cursor.fetchall()
     db.commit()
     db.close()
@@ -164,7 +166,9 @@ def read_scans(user):
             path TEXT,
             result BOOLEAN,
             confidence INTEGER,
-            hash TEXT
+            hash TEXT,
+            timestamp TEXT,
+            model TEXT
         )
     ''')
     

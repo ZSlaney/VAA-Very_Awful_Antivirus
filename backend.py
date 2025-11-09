@@ -88,6 +88,8 @@ async def scan_database(request: ScanDatabase, governor=Depends(get_governor)):
         #3-result
         #4-confidence -- -1 means unknown
         #5-hash
+        #6-timestamp
+        #7-modelname
         if scan[4] == -1:
             conf = "Unknown"
         else:
@@ -98,7 +100,7 @@ async def scan_database(request: ScanDatabase, governor=Depends(get_governor)):
         else:
             res = "BENIGNWARE"
 
-        scan_entry = {"Filename":scan[2], "Result":{"Classification": res, "Confidence":conf}, "hash": scan[5]}
+        scan_entry = {"Filename":scan[2], "Result":{"Classification": res, "Confidence":conf}, "hash": scan[5], "timestamp": scan[6], "model_name": scan[7]}
         full_scan_list.append(scan_entry)
 
     return JSONResponse(content=full_scan_list)

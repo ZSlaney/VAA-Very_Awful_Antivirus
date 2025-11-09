@@ -181,7 +181,7 @@ class VaaGovernor:
             
             self.logger.info(result["hash"])
             
-            sql.add_to_scans(user=self.get_username(key=key), path=file.filename, result=result["result"]["Classification"], confidence=result["result"]["Confidence"], hash=result["hash"])
+            sql.add_to_scans(user=self.get_username(key=key), path=file.filename, result=result["result"]["Classification"], confidence=result["result"]["Confidence"], hash=result["hash"], timestamp=result["timestamp"].strftime("%d/%m/%Y, %H:%M:%S"), model=result["model_name"])
 
     def get_all_user_jobs(self, key, perm_level):
         if self.verify_session(key, perm_level) == False:
@@ -207,7 +207,7 @@ class VaaGovernor:
 
 
                     
-                    scan = {"id": result["id"],"filename": result["filename"], "hash": result["hash"],"status": result["status"],"result": result["result"], "timestamp": result["timestamp"].strftime("%H:%M:%S")}
+                    scan = {"id": result["id"],"filename": result["filename"], "hash": result["hash"],"status": result["status"],"result": result["result"], "timestamp": result["timestamp"].strftime("%H:%M:%S"), "model_name": result["model_name"]}
                     scan_list.append(scan)
                 return scan_list
 
@@ -240,7 +240,7 @@ class VaaGovernor:
                 job_res["result"]["Classification"] = "BENIGNWARE"
             
 
-        scan = {"id": job_res["id"],"filename": job_res["filename"], "hash": job_res["hash"],"status": job_res["status"],"result": job_res["result"], "timestamp": job_res["timestamp"].strftime("%H:%M:%S")}
+        scan = {"id": job_res["id"],"filename": job_res["filename"], "hash": job_res["hash"],"status": job_res["status"],"result": job_res["result"], "timestamp": job_res["timestamp"].strftime("%H:%M:%S"), "model_name": job_res["model_name"]}
 
 
         #Return result
@@ -265,6 +265,8 @@ class VaaGovernor:
             #3-result
             #4-confidence -- -1 means unknown
             #5-Hash
+            #6-timestamp
+            #7-model_name
 
         if "result" in filter:
             match filter["result"]:
