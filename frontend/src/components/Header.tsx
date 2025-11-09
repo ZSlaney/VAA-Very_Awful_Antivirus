@@ -216,7 +216,7 @@ export default function Header({setPage}: {setPage: React.Dispatch<React.SetStat
               </Box>
             </MenuItem>
             <ListDivider />
-            <MenuItem>
+            <MenuItem onClick={() => setPage('help')}>
               <HelpRoundedIcon />
               Help
             </MenuItem>
