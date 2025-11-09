@@ -127,7 +127,7 @@ class VaaGovernor:
     
         return ""
     
-    def scan(self, file: UploadFile, key, perm_level):
+    def scan(self, file: UploadFile, key, perm_level, model_name):
         
 
         if self.verify_session(key, perm_level) == False:
@@ -135,7 +135,7 @@ class VaaGovernor:
         #valid session
         
         with self.locks["scan"]:
-            job_id = self.scanner.add_job(filename=file.filename, model_name="RandomForestV1", key=key)
+            job_id = self.scanner.add_job(filename=file.filename, model_name=model_name, key=key)
         
         path = Path(TMP_FOLDER + str(key) + "/" + file.filename)
         

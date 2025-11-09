@@ -113,18 +113,20 @@ class ScanRequest(BaseModel):
 async def scan_file(
     key: str = Form(...),  # Receive `key` as a form field
     perm_level: str = Form(...),  # Receive `perm_level` as a form field
+    model_name: str = Form(...),
     file: UploadFile = File(...),  # Receive the file
     governor=Depends(get_governor)
 ):
     print(f"Received key: {key}")
     print(f"Received perm_level: {perm_level}")
+    print(f"Received model_name: {model_name}")
     print(f"Received file: {file.filename}")
 
 
     if key == None:
         return{"Auth":"Failed"}
     
-    job = governor.scan(file=file, key=int(key), perm_level=int(perm_level))
+    job = governor.scan(file=file, key=int(key), perm_level=int(perm_level), model_name=model_name)
     if (job == False):
         #bad login or auth
         return JSONResponse(content={"Auth":"Failed"})

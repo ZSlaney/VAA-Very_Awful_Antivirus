@@ -98,8 +98,7 @@ class ModelHandler:
                 model_instance = self.rf.Model()
                 
             case "LogisticRegressionV1":
-                #model_instance = lr.Model()
-                raise NotImplementedError("Logistic Regression model not implemented yet.")
+                model_instance = self.lr.Model()
             case _:
                 raise ValueError(f"Model {model_name} not recognized.")
         handler = self.handlers[model_instance.handler_name]

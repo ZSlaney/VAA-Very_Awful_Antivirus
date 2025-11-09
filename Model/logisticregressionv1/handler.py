@@ -18,5 +18,12 @@ class Model(ModelInterface):
 
     def predict(self, processed_data) -> dict:
         # Make predictions using the loaded Random Forest model
-        predictions = self.model.predict(processed_data)
-        return predictions
+        processed_data = processed_data.drop(columns="SHA256")
+        
+        prediction = self.model.predict(processed_data)
+        conf = self.model.predict_proba(processed_data)
+
+        print(prediction)
+        print(conf)
+        res = {"Classification": prediction, "Confidence": conf}
+        return res
