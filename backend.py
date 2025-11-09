@@ -58,7 +58,11 @@ async def list_clients(governor=Depends(get_governor)):
 async def get_api_version():
     if startup_time:
         uptime_duration: timedelta = datetime.now() - startup_time
-        return {"Version":app.version, "VAA Build":"1.0", "uptime": str(uptime_duration)}
+        total_seconds = uptime_duration.total_seconds()
+        days = uptime_duration.days
+        hours, remainder = divmod(total_seconds - (days * 86400), 3600)
+        minutes, seconds = divmod(remainder, 60)
+        return {"Version":app.version, "VAA Build":"1.0", "uptime": f"{days}:{int(hours):02d}:{int(minutes):02d}:{int(seconds):02d}"}
     else:
         return {"Version":app.version, "VAA Build":"1.0", "uptime": "Application startup time not recorded."}
 
