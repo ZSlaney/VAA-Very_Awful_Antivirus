@@ -98,7 +98,7 @@ async def scan_database(request: ScanDatabase, governor=Depends(get_governor)):
         else:
             res = "BENIGNWARE"
 
-        scan_entry = {"Filename":scan[2], "Result":{"Classification": res, "Confidence":conf}, "hash": conf[5]}
+        scan_entry = {"Filename":scan[2], "Result":{"Classification": res, "Confidence":conf}, "hash": scan[5]}
         full_scan_list.append(scan_entry)
 
     return JSONResponse(content=full_scan_list)
