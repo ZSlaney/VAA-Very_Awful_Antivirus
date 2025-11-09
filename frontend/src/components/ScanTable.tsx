@@ -6,7 +6,7 @@ import FolderRoundedIcon from '@mui/icons-material/FolderRounded';
 
 
 
-export default function ScansTable() {
+export default function ScansTable({ data }: { data: any[] }) {
     return (
         <div>
             <Table
@@ -40,30 +40,34 @@ export default function ScansTable() {
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>
-                            <Typography level="body-sm">1</Typography>
-                        </td>
-                        <td>
-                            <Typography
-                                level="title-sm"
-                                startDecorator={<FolderRoundedIcon color="primary" />}
-                                sx={{ alignItems: 'flex-start' }}
-                            >
-                                aFilePath
-                            </Typography>
-                        </td>
-                        <td>
-                            <Typography level="body-sm">User1</Typography>
-                        </td>
-                        <td>
-                            <Typography level="body-sm">Benign</Typography>
-                        </td>
-                        <td>
-                            <Typography level="body-sm">70%</Typography>
-                        </td>
-                        
-                    </tr>
+                    {data.map((scan, index) => {
+
+                        return (
+                            <tr key={index}>
+                                <td>
+                                    <Typography level="body-sm">{index}</Typography>
+                                </td>
+                                <td>
+                                    <Typography
+                                        level="title-sm"
+                                        startDecorator={<FolderRoundedIcon color="primary" />}
+                                        sx={{ alignItems: 'flex-start' }}
+                                    >
+                                        {scan.Filename}
+                                    </Typography>
+                                </td>
+                                <td>
+                                    <Typography level="body-sm">{scan.User}</Typography>
+                                </td>
+                                <td>
+                                    <Typography level="body-sm">{scan.Result.Classification == "BENIGNWARE" ? "Benign" : "Malware"}</Typography>
+                                </td>
+                                <td>
+                                    <Typography level="body-sm">{scan.Result.Confidence}%</Typography>
+                                </td>
+                            </tr>
+                        );
+                    })}
                 </tbody>
             </Table>
         </div>

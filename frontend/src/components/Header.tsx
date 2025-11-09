@@ -79,11 +79,13 @@ export default function Header({setPage}: {setPage: React.Dispatch<React.SetStat
     // Fetch user permission level from backend
     if (DEBUG) {
       console.log('Fetching user permission level');
+      const user = getUser();
+      setUsername(user ? user.username : 'DebugUser');
       setPermLevel('Administrator');
-      setUsername('Admin');
     } else {
       const user = getUser();
       if (user === null) {
+        console.log('User is null, logging out');
         OnLogout();
       } else {
         setPermLevel(user.perm_level);
@@ -225,7 +227,7 @@ export default function Header({setPage}: {setPage: React.Dispatch<React.SetStat
               Users
             </MenuItem>
             <ListDivider />
-            <MenuItem>
+            <MenuItem onClick={OnLogout}>
               <LogoutRoundedIcon />
               Log out
             </MenuItem>

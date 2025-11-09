@@ -27,9 +27,7 @@ export default function JobsTable({ setPage }: { setPage: React.Dispatch<React.S
                 File Path
               </Typography>
             </th>
-            <th>
-              <Typography level="title-sm">Model</Typography>
-            </th>
+           
             <th>
               <Typography level="title-sm">Status</Typography>
             </th>
@@ -49,9 +47,7 @@ export default function JobsTable({ setPage }: { setPage: React.Dispatch<React.S
                 aFilePath
               </Typography>
             </td>
-            <td>
-              <Typography level="body-sm">Randomforest</Typography>
-            </td>
+            
             <td>
               <Typography level="body-sm">Pending</Typography>
             </td>

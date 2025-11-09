@@ -10,7 +10,6 @@ import {
 
 import { useFileDialog } from '@reactuses/core'
 
-import FolderRoundedIcon from '@mui/icons-material/FolderRounded';
 import EditRoundedIcon from '@mui/icons-material/EditRounded';
 import UploadIcon from '@mui/icons-material/Upload';
 import DeveloperBoardIcon from '@mui/icons-material/DeveloperBoard';
@@ -25,10 +24,13 @@ import type { PageType } from '../App';
 
 interface Job {
   id: number;
-  filepath: string;
   model: string;
-  status: 'Pending' | 'FileLoad' | 'Model' | 'Completed' | 'Error';
-  result: string;
+  status: "Complete" | "Pending";
+  result: {
+    Classification: string;
+    Confidence: number;
+  };
+  timestamp: string;
 }
 
 import { DEBUG } from '../App';
@@ -67,8 +69,8 @@ function formatFileSize(sizeInBytes: number): string {
 export default function ScanTool({ setPage }: { setPage: React.Dispatch<React.SetStateAction<PageType>> }) {
   const [drawerOpen, setDrawerOpen] = React.useState(false);
   const [currentJob, setCurrentJob] = React.useState<Job | null>(null);
-
-
+  const [result, setResult] = React.useState<string>('');
+  const [confidence, setConfidence] = React.useState<number>(0);
 
   //if session key is invalid, redirect to login page
   if (DEBUG) {
@@ -82,26 +84,29 @@ export default function ScanTool({ setPage }: { setPage: React.Dispatch<React.Se
       setPage('login');
     }
   }
-  React.useEffect(() => {
-    const job = getCurrentJob(); //returns number
-    let interval: number | undefined;
-    if (job) {
-      //fetch job details from backend
-      interval = setInterval(() => {
-        fetchJobDetails(Number(job)).then((data) => {
-          if (data && data.job) {
-            setCurrentJob(data.job);
-            if (data.job.status === 'Completed' || data.job.status === 'Error') {
-              if (interval !== undefined) {
-                clearInterval(interval);
-              }
-            }
-          }
+  const fetchJob = (job: number) => {
+    fetchJobDetails(job).then((data) => {
+          console.log('Fetched job details:', data);
+          setCurrentJob(data);
         }).catch((error) => {
           console.error('Error fetching job details:', error);
         });
-      }, 1000);
+  };
+  React.useEffect(() => {
+    if (currentJob) {
+      setResult(currentJob.result.Classification);
+      setConfidence(currentJob.result.Confidence);
     }
+  }, [currentJob]);
+
+  React.useEffect(() => {
+    let interval = setInterval(() => {
+      const job = getCurrentJob(); //returns number
+      console.log('Current job number:', job);
+      if (job !== null){
+        fetchJob(Number(job));
+      }
+      }, 2000);
     return () => {
       if (interval !== undefined) {
         clearInterval(interval);
@@ -189,7 +194,14 @@ export default function ScanTool({ setPage }: { setPage: React.Dispatch<React.Se
 
                   </Stack>
                 </Grid>
-                {currentJob && currentJob.status !== 'Completed' && currentJob.status !== 'Error' && <>
+                {currentJob  && <>
+                <Grid xs={12} md={4}>
+                    <Typography level="body-sm" sx={{ color: 'text.secondary' }}>
+                      JobNumber
+                    </Typography>
+                    <Divider sx={{ my: 1 }} />
+                    <Typography level="h4">{currentJob?.id ? currentJob.id : 'Unknown'}</Typography>
+                  </Grid>
                   <Grid xs={12} md={4}>
                     <Typography level="body-sm" sx={{ color: 'text.secondary' }}>
                       Model
@@ -199,16 +211,9 @@ export default function ScanTool({ setPage }: { setPage: React.Dispatch<React.Se
                   </Grid>
                   <Grid xs={12} md={4}>
                     <Typography level="body-sm" sx={{ color: 'text.secondary' }}>
-                      JobNumber
-                    </Typography>
-                    <Divider sx={{ my: 1 }} />
-                    <Typography level="h4">{currentJob?.id ? currentJob.id : 'Unknown'}</Typography>
-                  </Grid>
-                  <Grid xs={12} md={4}>
-                    <Typography level="body-sm" sx={{ color: 'text.secondary' }}>
                       Verdict
                     </Typography>
-                    <Typography level="h4">{currentJob?.result ? currentJob.result : 'Unknown'}</Typography>
+                    <Typography level="h4" color={result == "BENIGNWARE" ? "success" : "danger"}>{result == "BENIGNWARE" ? "BENIGN" : "MALWARE"}</Typography>
                     <Divider sx={{ my: 1 }} />
                     <Chip
                       size="sm"
@@ -216,7 +221,7 @@ export default function ScanTool({ setPage }: { setPage: React.Dispatch<React.Se
                       color="primary"
                       sx={{ fontWeight: '600' }}
                     >
-                      Confidence: 85%
+                      Confidence: { confidence ? `${confidence}%` : 'Unknown'}
                     </Chip>
                   </Grid>
                 </>}
@@ -256,7 +261,7 @@ export default function ScanTool({ setPage }: { setPage: React.Dispatch<React.Se
 
           </Box>
         </Layout.Main>
-        <FileUploadWindow />
+        <FileUploadWindow  />
       </Layout.Root>
     </CssVarsProvider>
   );
@@ -285,11 +290,12 @@ function FileUploadWindow() {
       console.log('Uploading file:', file);
 
       try {
-        const result = await uploadFile(file, getPermLevel());
+        const result = await uploadFile(file);
         console.log('Upload successful:', result);
-        setCurrentJob(result.jobNumber);
+        setCurrentJob(result['Job Id']);
         //on successful upload, reset the file state and set the current job number
         setFile(null);
+        
         //setCurrentJobNumber(newJobNumber); //you need to implement getting the new job number after upload
       } catch (error) {
         console.error('Upload failed:', error);
