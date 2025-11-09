@@ -65,11 +65,12 @@ const data = [
 ];
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Legend, ResponsiveContainer } from 'recharts';
 import ScansTable from '../components/ScanTable';
-import { getSessionKey } from '../context/utils';
+import { getSessionKey, queryScanDB } from '../context/utils';
 
 
 export default function Analytics({ setPage }: { setPage: React.Dispatch<React.SetStateAction<PageType>> }) {
   const [drawerOpen, setDrawerOpen] = React.useState(false);
+  const [data, setData] = React.useState<any[]>([]);
   //if session key is invalid, redirect to login page
   if (DEBUG) {
     console.log('Rendering Dashboard component');
@@ -82,6 +83,19 @@ export default function Analytics({ setPage }: { setPage: React.Dispatch<React.S
       setPage('login');
     }
   }
+  const updateData = () => {
+    // Fetch new data and update state
+    queryScanDB({"filter": 100}).then((newData) => {
+      const data:any[] = []
+      newData.forEach((item: any, index: number) => {
+        data.push(item);
+      });
+      setData(data);
+    });
+  };
+  React.useEffect(() => {
+    updateData();
+  }, []);
 
 
   return (
@@ -139,7 +153,7 @@ export default function Analytics({ setPage }: { setPage: React.Dispatch<React.S
                   <Box sx={{ width: '50%', height: '50%', display: 'flex', alignItems: 'center', mb: 2 }}>
                     <ResponsiveContainer width="90%" height="90%">
                       <LineChart
-                        data={data}
+                       
 
                       >
                         <CartesianGrid stroke="#aaa" strokeDasharray="5 5" />
@@ -167,7 +181,7 @@ export default function Analytics({ setPage }: { setPage: React.Dispatch<React.S
                   <Box sx={{ width: '50%', height: '50%', display: 'flex', alignItems: 'center', mb: 2 }}>
                     <ResponsiveContainer width="90%" height="90%">
                       <LineChart
-                        data={data}
+                        
                       >
                         <CartesianGrid stroke="#aaa" strokeDasharray="5 5" />
                         <Line type="monotone" dataKey="uv" stroke="purple" strokeWidth={2} name="My data series name" />
@@ -195,7 +209,7 @@ export default function Analytics({ setPage }: { setPage: React.Dispatch<React.S
                   <Box sx={{ width: '50%', height: '50%', display: 'flex', alignItems: 'center', mb: 2 }}>
                     <ResponsiveContainer width="90%" height="90%">
                       <LineChart
-                        data={data}
+                       
                       >
                         <CartesianGrid stroke="#aaa" strokeDasharray="5 5" />
                         <Line type="monotone" dataKey="uv" stroke="purple" strokeWidth={2} name="My data series name" />
@@ -223,7 +237,7 @@ export default function Analytics({ setPage }: { setPage: React.Dispatch<React.S
                   <Box sx={{ width: '50%', height: '50%', display: 'flex', alignItems: 'center', mb: 2 }}>
                     <ResponsiveContainer width="95%" height="95%">
                       <LineChart
-                        data={data}
+                        
                       >
                         <CartesianGrid stroke="#aaa" strokeDasharray="5 5" />
                         <Line type="monotone" dataKey="uv" stroke="purple" strokeWidth={2} name="My data series name" />
@@ -242,7 +256,7 @@ export default function Analytics({ setPage }: { setPage: React.Dispatch<React.S
                 display: { xs: 'none', md: 'flex' },
               }}
             >
-              <ScansTable />
+              <ScansTable data={data} />
             </Sheet>
             <Sheet
               variant="outlined"
@@ -250,6 +264,7 @@ export default function Analytics({ setPage }: { setPage: React.Dispatch<React.S
                 display: { xs: 'inherit', sm: 'none' },
                 borderRadius: 'sm',
                 overflow: 'auto',
+                maxHeight: '40vh',
                 backgroundColor: 'background.surface',
                 '& > *': {
                   '&:nth-child(n):not(:nth-last-child(-n+4))': {

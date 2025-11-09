@@ -14,12 +14,11 @@ import FindInPageIcon from '@mui/icons-material/FindInPage';
 
 import Layout from '../components/Layout';
 import Header from '../components/Header';
-import SideDrawer from '../components/Navigation';
 
 
 import { DEBUG, type PageType } from '../App';
 import JobsList from '../components/JobsTable';
-import { getSessionKey } from '../context/utils';
+import { fetchJobs, getSessionKey } from '../context/utils';
 import SmallTabBar from '../components/SmallTabBar';
 import { get_version_uptime } from '../context/utils';
 
@@ -39,29 +38,30 @@ export default function Dashboard({ setPage }: { setPage: React.Dispatch<React.S
     const sessionKey = getSessionKey();
     const isValidSession = sessionKey !== null && sessionKey !== undefined && sessionKey !== '';
     if (!isValidSession) {
-
+      console.log('Invalid session key, redirecting to login page');
       setPage('login');
     }
   }
-  const updateSystemStats = () => {
-    const systemStats = get_version_uptime()
+  const update = () => {
+    get_version_uptime()
         .then((data) => {
-          let uptime = data.uptime.split(':');
-          uptime[2] = parseFloat(parseFloat(uptime[2]).toFixed(2)).toString();//remove all but 2 decimal places from seconds
-          const formattedUptime = `${uptime[0]}h ${uptime[1]}m ${uptime[2]}s`;
-          data.uptime = formattedUptime;
           setSystemStats({
             systemUptime: data.uptime,
             version: data.Version,
             build: data["VAA Build"],
           });
-        });
+        }).then(() => {
+          fetchJobs().then((data) => {
+            //set jobs state
+            console.log('Fetched jobs data:', data);
+          });
+        }); 
   }
   React.useEffect(() => {
-    updateSystemStats();
+    update();
     const int = setInterval(() => {
       //refreh dash data every 10 seconds
-      updateSystemStats();
+      update();
     }, 10000);
     return () => {
       clearInterval(int);
@@ -70,9 +70,9 @@ export default function Dashboard({ setPage }: { setPage: React.Dispatch<React.S
   return (
     <CssVarsProvider disableTransitionOnChange>
       <CssBaseline />
-      {drawerOpen && (
+      { drawerOpen && (
         <Layout.SideDrawer onClose={() => setDrawerOpen(false)}>
-          <SideDrawer />
+          
         </Layout.SideDrawer>
       )}
       <SmallTabBar />
@@ -95,8 +95,9 @@ export default function Dashboard({ setPage }: { setPage: React.Dispatch<React.S
           <Header setPage={setPage} />
         </Layout.Header>
         <Layout.SideNav>
-          <SideDrawer />
-        </Layout.SideNav>
+          
+        </Layout.SideNav> 
+        
         <Layout.Main>
           <Box
             sx={{

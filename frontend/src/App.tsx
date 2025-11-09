@@ -10,7 +10,7 @@ import Help from './pages/Help';
 
 export type PageType = 'login' | 'dashboard' | 'about' | 'analytics' | 'scantool' | 'help';
 
-export const DEBUG = true;
+export const DEBUG = false;
 
 export default function App() {
   const [page, setPage] = React.useState<PageType>('login');

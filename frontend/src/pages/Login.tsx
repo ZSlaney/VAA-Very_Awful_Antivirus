@@ -4,25 +4,17 @@ import GlobalStyles from '@mui/joy/GlobalStyles';
 import CssBaseline from '@mui/joy/CssBaseline';
 import Box from '@mui/joy/Box';
 import Button from '@mui/joy/Button';
-import Checkbox from '@mui/joy/Checkbox';
 import Divider from '@mui/joy/Divider';
-import FormControl from '@mui/joy/FormControl';
 import FormLabel from '@mui/joy/FormLabel';
 import IconButton from '@mui/joy/IconButton';
-import Link from '@mui/joy/Link';
 import Input from '@mui/joy/Input';
 import Typography from '@mui/joy/Typography';
 import Stack from '@mui/joy/Stack';
 import Logo from '../../public/VA-AV.png';
 
-import { issueAuth } from '../context/utils';
+import { issueAuth, setUser } from '../context/utils';
 import { DEBUG, type PageType } from '../App';
 
-interface FormElements extends HTMLFormControlsCollection {
-  email: HTMLInputElement;
-  password: HTMLInputElement;
-  persistent: HTMLInputElement;
-}
 
 
 
@@ -30,22 +22,33 @@ const customTheme = extendTheme({});
 
 export default function Login({ setPage }: { setPage: React.Dispatch<React.SetStateAction<PageType>> }) {
   const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState<boolean>(false);
 
   const handleLogin = async (username: string, password: string) => {
     try {
       setLoading(true);
       if (DEBUG) {
         console.log(`Attempting login with username: ${username} and password: ${password}`);
+        if (username == null || password == null) {
+          console.error('Username or password is null');
+          setError(true);
+          return;
+        }
+        setUser(username);
         setPage('dashboard');
       } else {
         const sessionKey = await issueAuth(username, password);
         if (sessionKey) {
+          setUser(username);
           setPage('dashboard');
+        } else {
+          setError(true);
         }
       }
 
     } catch (error) {
       console.error('Login failed:', error);
+      setError(true);
     } finally {
       setLoading(false);
     }
@@ -143,11 +146,11 @@ export default function Login({ setPage }: { setPage: React.Dispatch<React.SetSt
                 handleLogin(username, password);
               }} >
                 <FormLabel>Username</FormLabel>
-                <Input type="username" name="username" />
+                <Input required type="username" name="username" />
                 <FormLabel>Password</FormLabel>
-                <Input type="password" name="password" />
+                <Input required type="password" name="password" />
                 <Stack sx={{ gap: 4, mt: 2 }}>
-                  <Button type="submit" fullWidth loading={loading}>
+                  <Button type="submit" color={error ? 'danger' : "primary"} fullWidth loading={loading}>
                     Sign in
                   </Button>
                 </Stack>
