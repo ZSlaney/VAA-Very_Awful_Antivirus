@@ -3,7 +3,6 @@ import { CssVarsProvider } from '@mui/joy/styles';
 import CssBaseline from '@mui/joy/CssBaseline';
 import AspectRatio from '@mui/joy/AspectRatio';
 import Box from '@mui/joy/Box';
-import Button from '@mui/joy/Button';
 import Card from '@mui/joy/Card';
 import CardOverflow from '@mui/joy/CardOverflow';
 import Typography from '@mui/joy/Typography';
@@ -11,10 +10,6 @@ import Sheet from '@mui/joy/Sheet';
 import Stack from '@mui/joy/Stack';
 import { CircularProgress, Grid } from '@mui/joy';
 
-import FolderRoundedIcon from '@mui/icons-material/FolderRounded';
-import EmailRoundedIcon from '@mui/icons-material/EmailRounded';
-import PeopleAltRoundedIcon from '@mui/icons-material/PeopleAltRounded';
-import TroubleshootIcon from '@mui/icons-material/Troubleshoot';
 import FindInPageIcon from '@mui/icons-material/FindInPage';
 
 import Layout from '../components/Layout';
@@ -32,7 +27,7 @@ export default function Dashboard({ setPage }: { setPage: React.Dispatch<React.S
   const [drawerOpen, setDrawerOpen] = React.useState(false);
   const [systemStats, setSystemStats] = React.useState({
     systemUptime: '00:00:00',
-    version: 'Idle',
+    version: 'None',
     build: 'None',
   });
 
@@ -131,13 +126,19 @@ export default function Dashboard({ setPage }: { setPage: React.Dispatch<React.S
                   <Typography level="body-sm" sx={{ color: 'text.secondary' }}>
                     AI Core System
                   </Typography>
-                  <Typography level="title-lg" >none</Typography>
+                  <Typography level="title-lg" >Idle</Typography>
                 </Grid>
                 <Grid xs={12} sm={3}>
                   <Typography level="body-sm" sx={{ color: 'text.secondary' }}>
-                    Alerts
+                    Web Version
                   </Typography>
-                  <Typography level="title-lg">none</Typography>
+                  <Typography level="title-lg">{systemStats.version}</Typography>
+                </Grid>
+                <Grid xs={12} sm={3}>
+                  <Typography level="body-sm" sx={{ color: 'text.secondary' }}>
+                    VAA Build
+                  </Typography>
+                  <Typography level="title-lg">{systemStats.build}</Typography>
                 </Grid>
               </Grid>
             </Sheet>
@@ -177,28 +178,7 @@ export default function Dashboard({ setPage }: { setPage: React.Dispatch<React.S
                 </Grid>
               </Grid>
             </Sheet>
-            <Card variant="outlined" size="sm">
-              <CardOverflow
-                sx={{
-                  borderBottom: '1px solid',
-                  borderTop: '1px solid',
-                  borderColor: 'neutral.outlinedBorder',
-                }}
-              >
-                <AspectRatio ratio="16/9" color="primary" sx={{ borderRadius: 0 }}>
-                  <TroubleshootIcon />
-                </AspectRatio>
-              </CardOverflow>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Box sx={{ flex: 1 }}>
-                  <Typography level="title-md">Quick Scan</Typography>
-
-                </Box>
-              </Box>
-
-              <Typography level="body-xs">Scan Common file locations for Malware</Typography>
-            </Card>
-            <Card variant="outlined" size="sm">
+            <Card variant="outlined" size="sm" onClick={() => setPage('scantool')} sx={{ cursor: 'pointer' }}>
               <CardOverflow
                 sx={{
                   borderBottom: '1px solid',
@@ -273,7 +253,7 @@ export default function Dashboard({ setPage }: { setPage: React.Dispatch<React.S
             >
               <Stack justifyContent="space-between" sx={{ p: 2, flexGrow: 1 }}>
                 <Typography level="title-lg">Active Jobs</Typography>
-                <JobsList />
+                <JobsList setPage={setPage} />
               </Stack>
             </Sheet>
 

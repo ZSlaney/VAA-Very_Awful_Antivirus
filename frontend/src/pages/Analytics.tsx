@@ -172,6 +172,7 @@ export default function Analytics({ setPage }: { setPage: React.Dispatch<React.S
                         <CartesianGrid stroke="#aaa" strokeDasharray="5 5" />
                         <Line type="monotone" dataKey="uv" stroke="purple" strokeWidth={2} name="My data series name" />
                         <XAxis dataKey="name" />
+                        <YAxis />
                       </LineChart>
                     </ResponsiveContainer>
                   </Box>
@@ -199,6 +200,7 @@ export default function Analytics({ setPage }: { setPage: React.Dispatch<React.S
                         <CartesianGrid stroke="#aaa" strokeDasharray="5 5" />
                         <Line type="monotone" dataKey="uv" stroke="purple" strokeWidth={2} name="My data series name" />
                         <XAxis dataKey="name" />
+                         <YAxis />
                       </LineChart>
                     </ResponsiveContainer>
                   </Box>

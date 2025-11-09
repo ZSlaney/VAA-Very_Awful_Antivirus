@@ -1,15 +1,10 @@
 import * as React from 'react';
-import Avatar from '@mui/joy/Avatar';
-import AvatarGroup from '@mui/joy/AvatarGroup';
 import Typography from '@mui/joy/Typography';
 import Table from '@mui/joy/Table';
-import IconButton from '@mui/joy/IconButton';
-
 
 import FolderRoundedIcon from '@mui/icons-material/FolderRounded';
-import ArrowDropDownRoundedIcon from '@mui/icons-material/ArrowDropDownRounded';
-import { Dropdown, Menu, MenuItem } from '@mui/joy';
-import { MenuButton } from '@mui/base';
+
+
 
 export default function ScansTable() {
     return (
@@ -42,16 +37,12 @@ export default function ScansTable() {
                         <th>
                             <Typography level="title-sm">Confidence</Typography>
                         </th>
-                        <th>
-
-                        </th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
                         <td>
                             <Typography level="body-sm">1</Typography>
-
                         </td>
                         <td>
                             <Typography
@@ -71,17 +62,7 @@ export default function ScansTable() {
                         <td>
                             <Typography level="body-sm">70%</Typography>
                         </td>
-                        <td>
-                            <Dropdown>
-                                <MenuButton
-                                >
-                                    <ArrowDropDownRoundedIcon />
-                                </MenuButton>
-                                <Menu>
-                                    <MenuItem >View</MenuItem>
-                                </Menu>
-                            </Dropdown>
-                        </td>
+                        
                     </tr>
                 </tbody>
             </Table>

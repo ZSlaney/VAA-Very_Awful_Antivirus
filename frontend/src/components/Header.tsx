@@ -25,8 +25,9 @@ import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 
 import Navigation from './Navigation';
-import { clearAuth } from '../context/utils';
-import type { PageType } from '../App';
+import { clearAuth, getUser } from '../context/utils';
+import { DEBUG, type PageType } from '../App';
+import UsersModal from './UsersModal';
 
 function ColorSchemeToggle() {
   const { mode, setMode } = useColorScheme();
@@ -59,16 +60,42 @@ function ColorSchemeToggle() {
   );
 }
 
+
+
 export default function Header({setPage}: {setPage: React.Dispatch<React.SetStateAction<PageType>>}) {
   const [open, setOpen] = React.useState(false);
+  const [usersOpen, setUsersOpen] = React.useState(false);
+
+  const [perm_level, setPermLevel] = React.useState('');
+  const [username, setUsername] = React.useState('');
+
   const OnLogout = () => {
     // Clear session key and redirect to login page
     clearAuth();
     setPage('login');
   };
 
+  React.useEffect(() => {
+    // Fetch user permission level from backend
+    if (DEBUG) {
+      console.log('Fetching user permission level');
+      setPermLevel('Administrator');
+      setUsername('Admin');
+    } else {
+      const user = getUser();
+      if (user === null) {
+        OnLogout();
+      } else {
+        setPermLevel(user.perm_level);
+        setUsername(user.username);
+      }
+    }
+  }, []);
+
+
   return (
     <Box sx={{ display: 'flex', flexGrow: 1, justifyContent: 'space-between' }}>
+      <UsersModal open={usersOpen} setOpen={setUsersOpen} />
       <Stack
         direction="row"
         spacing={1}
@@ -180,10 +207,10 @@ export default function Header({setPage}: {setPage: React.Dispatch<React.SetStat
                 />
                 <Box sx={{ ml: 1.5 }}>
                   <Typography level="title-sm" textColor="text.primary">
-                    Admin
+                    {username}
                   </Typography>
                   <Typography level="body-xs" textColor="text.tertiary">
-                    Administrator
+                    {perm_level}
                   </Typography>
                 </Box>
               </Box>
@@ -193,21 +220,9 @@ export default function Header({setPage}: {setPage: React.Dispatch<React.SetStat
               <HelpRoundedIcon />
               Help
             </MenuItem>
-            <MenuItem>
+            <MenuItem onClick={() => setUsersOpen(true)}>
               <SettingsRoundedIcon />
-              Settings
-            </MenuItem>
-            <ListDivider />
-            <MenuItem component="a" href="/blog/first-look-at-joy/">
-              First look at Joy UI
-              <OpenInNewRoundedIcon />
-            </MenuItem>
-            <MenuItem
-              component="a"
-              href="https://github.com/mui/material-ui/tree/master/docs/data/joy/getting-started/templates/email"
-            >
-              Sourcecode
-              <OpenInNewRoundedIcon />
+              Users
             </MenuItem>
             <ListDivider />
             <MenuItem>

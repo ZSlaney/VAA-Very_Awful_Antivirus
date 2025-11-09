@@ -4,9 +4,11 @@ import Dashboard from './pages/Dashboard';
 import AboutUs from './pages/AboutUs';
 import Analytics from './pages/Analytics';
 import ScanTool from './pages/ScanTool';
+import Help from './pages/Help';
 
 
-export type PageType = 'login' | 'dashboard' | 'about' | 'analytics' | 'scantool';
+
+export type PageType = 'login' | 'dashboard' | 'about' | 'analytics' | 'scantool' | 'help';
 
 export const DEBUG = true;
 
@@ -19,6 +21,7 @@ export default function App() {
     {page === 'about' && <AboutUs setPage={setPage} />}
     {page === 'analytics' && <Analytics setPage={setPage} />}
     {page === 'scantool' && <ScanTool setPage={setPage} />}
+    {page === 'help' && <Help setPage={setPage} />}
     </>
 
   );

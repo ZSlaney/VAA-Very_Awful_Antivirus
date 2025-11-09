@@ -4,17 +4,16 @@ import {
   CssBaseline, AspectRatio, Avatar, AvatarGroup, Box, Button, Card, CardOverflow, Typography,
   IconButton, Divider, Sheet, List, ListItem, ListDivider, ListItemButton,
   ListItemContent, Stack, Chip, Dropdown, Menu, MenuButton, MenuItem, CircularProgress, Grid, LinearProgress,
-  Stepper, Step, StepIndicator
+  Stepper, Step, StepIndicator, Option,
+  Select
 } from '@mui/joy';
 
 import { useFileDialog } from '@reactuses/core'
 
 import FolderRoundedIcon from '@mui/icons-material/FolderRounded';
 import EditRoundedIcon from '@mui/icons-material/EditRounded';
-import MoreVertRoundedIcon from '@mui/icons-material/MoreVertRounded';
-import ShareRoundedIcon from '@mui/icons-material/ShareRounded';
-import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded';
 import UploadIcon from '@mui/icons-material/Upload';
+import DeveloperBoardIcon from '@mui/icons-material/DeveloperBoard';
 
 import Layout from '../components/Layout';
 import Header from '../components/Header';
@@ -33,9 +32,23 @@ interface Job {
 }
 
 import { DEBUG } from '../App';
-import { getCurrentJob, getSessionKey } from '../context/utils';
+import { getCurrentJob, getSessionKey, setCurrentJob, fetchJobDetails } from '../context/utils';
 
+import { LineChart, Line, XAxis, CartesianGrid, ResponsiveContainer, YAxis } from 'recharts';
 
+const data = [
+  {
+    name: 'Page A',
+    uv: 400,
+    pv: 2400,
+    amt: 2400,
+  },
+  {
+    name: 'Page B',
+    uv: 300,
+    pv: 4567,
+    amt: 2400,
+  }];
 
 function formatFileSize(sizeInBytes: number): string {
   const units = ['B', 'KB', 'MB', 'GB', 'TB'];
@@ -54,7 +67,7 @@ function formatFileSize(sizeInBytes: number): string {
 export default function ScanTool({ setPage }: { setPage: React.Dispatch<React.SetStateAction<PageType>> }) {
   const [drawerOpen, setDrawerOpen] = React.useState(false);
   const [currentJob, setCurrentJob] = React.useState<Job | null>(null);
-  const [currentjobNumber, setCurrentJobNumber] = React.useState<number | null>(null);
+
 
 
   //if session key is invalid, redirect to login page
@@ -71,11 +84,32 @@ export default function ScanTool({ setPage }: { setPage: React.Dispatch<React.Se
   }
   React.useEffect(() => {
     const job = getCurrentJob(); //returns number
+    let interval: number | undefined;
     if (job) {
-      setCurrentJob(job);
-      setCurrentJobNumber(job);
+      //fetch job details from backend
+      interval = setInterval(() => {
+        fetchJobDetails(Number(job)).then((data) => {
+          if (data && data.job) {
+            setCurrentJob(data.job);
+            if (data.job.status === 'Completed' || data.job.status === 'Error') {
+              if (interval !== undefined) {
+                clearInterval(interval);
+              }
+            }
+          }
+        }).catch((error) => {
+          console.error('Error fetching job details:', error);
+        });
+      }, 1000);
+    }
+    return () => {
+      if (interval !== undefined) {
+        clearInterval(interval);
+      }
     }
   }, []);
+
+
 
 
   return (
@@ -132,213 +166,93 @@ export default function ScanTool({ setPage }: { setPage: React.Dispatch<React.Se
                       <Step
                         indicator={
                           <CircularProgress size="sm" determinate={true}>
-                              <Typography level="body-xs" sx={{ color: 'white' }}>1</Typography>
-                            </CircularProgress>
+                            <Typography level="body-xs" sx={{ color: 'white' }}>1</Typography>
+                          </CircularProgress>
                         }
                       >Loading File</Step>
                       <Step
                         indicator={
-                           <CircularProgress size="sm" determinate={true}>
-                              <Typography level="body-xs" sx={{ color: 'white' }}>2</Typography>
-                            </CircularProgress>
+                          <CircularProgress size="sm" determinate={true}>
+                            <Typography level="body-xs" sx={{ color: 'white' }}>2</Typography>
+                          </CircularProgress>
                         }
                       >Executing Model</Step>
                       <Step
                         indicator={
-                            <CircularProgress size="sm" determinate={true}>
-                              <Typography level="body-xs" sx={{ color: 'white' }}>3</Typography>
-                            </CircularProgress>
-                         
+                          <CircularProgress size="sm" determinate={true}>
+                            <Typography level="body-xs" sx={{ color: 'white' }}>3</Typography>
+                          </CircularProgress>
+
                         }
                       >Results Processing</Step>
                     </Stepper>
 
-                    <LinearProgress determinate value={25} />
                   </Stack>
                 </Grid>
-                <Grid xs={12} md={4}>
-                  <Typography level="body-sm" sx={{ color: 'text.secondary' }}>
-                    Model
-                  </Typography>
-                  <Typography level="h4">RandomForest</Typography>
-                  <Divider sx={{ my: 1 }} />
-                  <Chip
-                    size="sm"
-                    variant="soft"
-                    color="primary"
-                    sx={{ fontWeight: '600' }}
-                  >
-                    +24 since last week
-                  </Chip>
-                </Grid>
-                <Grid xs={12} md={4}>
-                  <Typography level="body-sm" sx={{ color: 'text.secondary' }}>
-                    JobNumber
-                  </Typography>
-                  <Typography level="h4">34</Typography>
-                  <Divider sx={{ my: 1 }} />
-                  <Chip
-                    size="sm"
-                    variant="soft"
-                    color="primary"
-                    sx={{ fontWeight: '600' }}
-                  >
-                    +2 since last week
-                  </Chip>
-                </Grid>
-                <Grid xs={12} md={4}>
-                  <Typography level="body-sm" sx={{ color: 'text.secondary' }}>
-                    Verdict
-                  </Typography>
-                  <Typography level="h4">Benign</Typography>
-                  <Divider sx={{ my: 1 }} />
-                  <Chip
-                    size="sm"
-                    variant="soft"
-                    color="primary"
-                    sx={{ fontWeight: '600' }}
-                  >
-                    Confidence: 85%
-                  </Chip>
-                </Grid>
+                {currentJob && currentJob.status !== 'Completed' && currentJob.status !== 'Error' && <>
+                  <Grid xs={12} md={4}>
+                    <Typography level="body-sm" sx={{ color: 'text.secondary' }}>
+                      Model
+                    </Typography>
+                    <Divider sx={{ my: 1 }} />
+                    <Typography level="h4">{currentJob?.model ? currentJob.model : 'Unknown'}</Typography>
+                  </Grid>
+                  <Grid xs={12} md={4}>
+                    <Typography level="body-sm" sx={{ color: 'text.secondary' }}>
+                      JobNumber
+                    </Typography>
+                    <Divider sx={{ my: 1 }} />
+                    <Typography level="h4">{currentJob?.id ? currentJob.id : 'Unknown'}</Typography>
+                  </Grid>
+                  <Grid xs={12} md={4}>
+                    <Typography level="body-sm" sx={{ color: 'text.secondary' }}>
+                      Verdict
+                    </Typography>
+                    <Typography level="h4">{currentJob?.result ? currentJob.result : 'Unknown'}</Typography>
+                    <Divider sx={{ my: 1 }} />
+                    <Chip
+                      size="sm"
+                      variant="soft"
+                      color="primary"
+                      sx={{ fontWeight: '600' }}
+                    >
+                      Confidence: 85%
+                    </Chip>
+                  </Grid>
+                </>}
               </Grid>
+
             </Sheet>
             <Sheet
               variant="outlined"
               sx={{
-                display: { xs: 'inherit', sm: 'none' },
                 borderRadius: 'sm',
-                overflow: 'auto',
-                backgroundColor: 'background.surface',
-                '& > *': {
-                  '&:nth-child(n):not(:nth-last-child(-n+4))': {
-                    borderBottom: '1px solid',
-                    borderColor: 'divider',
-                  },
-                },
+                gridColumn: '1/-1',
+                display: { xs: 'none', md: 'flex' },
               }}
             >
-              <List size="sm" aria-labelledby="table-in-list">
-                <ListItem>
-                  <ListItemButton variant="soft" sx={{ bgcolor: 'transparent' }}>
-                    <ListItemContent sx={{ p: 1 }}>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <Typography
-                          level="title-sm"
-                          startDecorator={<FolderRoundedIcon color="primary" />}
-                          sx={{ alignItems: 'flex-start' }}
-                        >
-                          Travel pictures
-                        </Typography>
-                        <AvatarGroup
-                          size="sm"
-                          sx={{
-                            '--AvatarGroup-gap': '-8px',
-                            '--Avatar-size': '24px',
-                          }}
-                        >
-                          <Avatar
-                            src="https://i.pravatar.cc/24?img=6"
-                            srcSet="https://i.pravatar.cc/48?img=6 2x"
-                          />
-                          <Avatar
-                            src="https://i.pravatar.cc/24?img=7"
-                            srcSet="https://i.pravatar.cc/48?img=7 2x"
-                          />
-                          <Avatar
-                            src="https://i.pravatar.cc/24?img=8"
-                            srcSet="https://i.pravatar.cc/48?img=8 2x"
-                          />
-                          <Avatar
-                            src="https://i.pravatar.cc/24?img=9"
-                            srcSet="https://i.pravatar.cc/48?img=9 2x"
-                          />
-                        </AvatarGroup>
-                      </Box>
-                      <Box
-                        sx={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          mt: 2,
-                        }}
-                      >
-                        <Typography level="body-sm">987.5MB</Typography>
+              <Stack justifyContent="space-between" sx={{ p: 1, width: '100%', height: '100%' }}>
+                <Typography level="title-md" sx={{ mb: 1 }}>
+                  File History
+                </Typography>
+                <Divider sx={{ mb: 1 }} />
+                <AspectRatio ratio="16/9" color="neutral" sx={{ borderRadius: 0 }}>
+                  <Box sx={{ width: '90%', height: '90%', display: 'flex', alignItems: 'center', mb: 2 }}>
+                    <ResponsiveContainer width="90%" height="90%">
+                      <LineChart
+                        data={data}
 
-                        <Typography level="body-sm">21 Oct 2023, 3PM</Typography>
-                      </Box>
-                    </ListItemContent>
-                  </ListItemButton>
-                </ListItem>
-                <ListDivider />
-              </List>
-            </Sheet>
-            <Card variant="outlined" size="sm">
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Box sx={{ flex: 1 }}>
-                  <Typography level="title-md">lotr-two-towers.pdf</Typography>
-                  <Typography level="body-sm">132.2MB</Typography>
-                </Box>
-                <Dropdown>
-                  <MenuButton
-                    variant="plain"
-                    size="sm"
-                    sx={{
-                      maxWidth: '32px',
-                      maxHeight: '32px',
-                      borderRadius: '9999999px',
-                    }}
-                  >
-                    <IconButton
-                      component="span"
-                      variant="plain"
-                      color="neutral"
-                      size="sm"
-                    >
-                      <MoreVertRoundedIcon />
-                    </IconButton>
-                  </MenuButton>
-                  <Menu
-                    placement="bottom-end"
-                    size="sm"
-                    sx={{
-                      zIndex: '99999',
-                      p: 1,
-                      gap: 1,
-                      '--ListItem-radius': 'var(--joy-radius-sm)',
-                    }}
-                  >
-                    <MenuItem>
-                      <EditRoundedIcon />
-                      Rename file
-                    </MenuItem>
-                    <MenuItem>
-                      <ShareRoundedIcon />
-                      Share file
-                    </MenuItem>
-                    <MenuItem sx={{ textColor: 'danger.500' }}>
-                      <DeleteRoundedIcon color="danger" />
-                      Delete file
-                    </MenuItem>
-                  </Menu>
-                </Dropdown>
-              </Box>
-              <CardOverflow
-                sx={{
-                  borderBottom: '1px solid',
-                  borderTop: '1px solid',
-                  borderColor: 'neutral.outlinedBorder',
-                }}
-              >
-                <AspectRatio ratio="16/9" color="primary" sx={{ borderRadius: 0 }}>
-                  <img
-                    alt=""
-                    src="https://images.unsplash.com/photo-1621351183012-e2f9972dd9bf?w=400&h=400&auto=format"
-                    srcSet="https://images.unsplash.com/photo-1621351183012-e2f9972dd9bf?w=400&h=400&auto=format&dpr=2 2x"
-                  />
+                      >
+                        <CartesianGrid stroke="#aaa" strokeDasharray="5 5" />
+                        <Line type="monotone" dataKey="uv" stroke="purple" strokeWidth={2} name="My data series name" />
+                        <XAxis dataKey="name" />
+                        <YAxis  />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </Box>
                 </AspectRatio>
-              </CardOverflow>
-              <Typography level="body-xs">Added 27 Jun 2023</Typography>
-            </Card>
+              </Stack>
+            </Sheet>
 
           </Box>
         </Layout.Main>
@@ -373,6 +287,7 @@ function FileUploadWindow() {
       try {
         const result = await uploadFile(file, getPermLevel());
         console.log('Upload successful:', result);
+        setCurrentJob(result.jobNumber);
         //on successful upload, reset the file state and set the current job number
         setFile(null);
         //setCurrentJobNumber(newJobNumber); //you need to implement getting the new job number after upload
@@ -381,7 +296,7 @@ function FileUploadWindow() {
       }
     }
   };
-      //
+  //
 
 
   return (
@@ -438,6 +353,11 @@ function FileUploadWindow() {
             </Typography>
           </Box>
           <Divider />
+          <Box sx={{ py: 2, px: 1 }}>
+            <Select size="sm" defaultValue={"RandomForestV1"} startDecorator={"Model:"} endDecorator={< DeveloperBoardIcon />}>
+              <Option value={"RandomForestV1"}>Random ForestV1</Option> {/* Placeholder*/}
+            </Select>
+          </Box>
           <Box sx={{ py: 2, px: 1 }}>
             <Button size="sm" endDecorator={<EditRoundedIcon />} onClick={() => handleFileUpload()}>
               Add Job

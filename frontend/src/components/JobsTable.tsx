@@ -1,13 +1,11 @@
 import * as React from 'react';
-import Avatar from '@mui/joy/Avatar';
-import AvatarGroup from '@mui/joy/AvatarGroup';
 import Typography from '@mui/joy/Typography';
 import Table from '@mui/joy/Table';
 
 import FolderRoundedIcon from '@mui/icons-material/FolderRounded';
-import ArrowDropDownRoundedIcon from '@mui/icons-material/ArrowDropDownRounded';
+import type { PageType } from '../App';
 
-export default function JobsTable() {
+export default function JobsTable({ setPage }: { setPage: React.Dispatch<React.SetStateAction<PageType>> }) {
   return (
     <div>
       <Table
@@ -35,16 +33,12 @@ export default function JobsTable() {
             <th>
               <Typography level="title-sm">Status</Typography>
             </th>
-            <th>
-              <Typography level="title-sm">Result</Typography>
-            </th>
           </tr>
         </thead>
         <tbody>
           <tr>
             <td>
               <Typography level="body-sm">1</Typography>
-             
             </td>
             <td>
                <Typography
@@ -59,9 +53,6 @@ export default function JobsTable() {
               <Typography level="body-sm">Randomforest</Typography>
             </td>
             <td>
-              <Typography level="body-sm">Pending</Typography>
-            </td>
-             <td>
               <Typography level="body-sm">Pending</Typography>
             </td>
           </tr>

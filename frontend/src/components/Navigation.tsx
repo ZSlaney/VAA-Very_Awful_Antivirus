@@ -11,25 +11,13 @@ import SdCardAlertIcon from '@mui/icons-material/SdCardAlert';
 import EventNoteIcon from '@mui/icons-material/EventNote';
 import FindInPageIcon from '@mui/icons-material/FindInPage';
 import { Modal, ModalDialog,ModalClose, Typography, Divider } from '@mui/joy';
+import LogsModal from './LogsModal';
 
 export default function SideDrawer() {
   const [open, setOpen] = React.useState(false);
   return (
     <>
-      <Modal open={open} onClose={() => setOpen(false)}>
-        <ModalDialog size='lg'>
-          <ModalClose />
-          <Typography level='title-lg'>Logs</Typography>
-          <Divider sx={{ my: 2 }} />
-          <code>
-            {`[2024-06-01 12:00:00] Scan ID: 1, File Path: /path/to/file1.exe, User: User1, Result: Benign, Confidence: 70%`}
-            <br />
-            {`[2024-06-01 12:05:00] Scan ID: 2, File Path: /path/to/file2.exe, User: User2, Result: Malicious, Confidence: 95%`}
-            <br />
-            {`[2024-06-01 12:10:00] Scan ID: 3, File Path: /path/to/file3.exe, User: User3, Result: Benign, Confidence: 80%`}
-          </code>
-        </ModalDialog>
-      </Modal>
+      <LogsModal open={open} setOpen={setOpen} />
       <List size="sm" sx={{ '--ListItem-radius': '8px', '--List-gap': '4px' }}>
         <ListItem nested>
           <ListSubheader sx={{ letterSpacing: '2px', fontWeight: '800' }}>

@@ -30,7 +30,7 @@ else:
 
 
 # Dependency to access the VaaGovernor instance
-def get_governor():
+def get_governor(): 
     return app.state.governor
 
 
@@ -101,16 +101,6 @@ async def scan_database(request: ScanDatabase, governor=Depends(get_governor)):
 class ScanRequest(BaseModel):
     key: int
     perm_level: int
-
-def checker(data: str = Form(...)):
-    try:
-        return ScanRequest.model_validate_json(data)
-    except ValidationError as e:
-        raise HTTPException(
-            detail=jsonable_encoder(e.errors()),
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-        )
-
 
 @app.post("/api/scan/add")
 async def scan_file(
