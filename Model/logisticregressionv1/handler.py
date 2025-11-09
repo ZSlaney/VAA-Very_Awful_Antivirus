@@ -8,13 +8,13 @@ import os
 PATH = os.path.dirname(os.path.abspath(__file__)) + "/log_reg.joblib"
 
 class Model(ModelInterface):
-    def __init__(self, model_name, model_version, model_type, handler_name):
+    def __init__(self, model_name="", model_version="", model_type="", handler_name="PEExtract"):
         super().__init__(model_name, model_version, model_type, handler_name)
         self.load_model()
 
     def load_model(self):
         # Load the Random Forest model
-        self.model = joblib.load(PATH)
+        self.model: LogisticRegression = joblib.load(PATH)
 
     def predict(self, processed_data) -> dict:
         # Make predictions using the loaded Random Forest model
