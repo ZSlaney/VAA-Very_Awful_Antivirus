@@ -94,7 +94,21 @@ export default function Header({setPage}: {setPage: React.Dispatch<React.SetStat
 
 
   return (
-    <Box sx={{ display: 'flex', flexGrow: 1, justifyContent: 'space-between' }}>
+    <Box sx={{ display: 'flex', flexGrow: 1, justifyContent: 'space-between'}}>
+      <Typography
+        level="body-xs"
+        sx={{
+          position: 'absolute',
+          bottom: -16,
+          left: 12,
+          fontSize: '0.65rem',
+          color: 'text.tertiary',
+          opacity: 0.7,
+          pointerEvents: 'none',
+        }}
+      >
+        © {new Date().getFullYear()} VA-AV
+      </Typography>
       <UsersModal open={usersOpen} setOpen={setUsersOpen} />
       <Stack
         direction="row"
