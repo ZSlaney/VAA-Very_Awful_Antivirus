@@ -14,6 +14,11 @@ import Input from '@mui/joy/Input';
 import Typography from '@mui/joy/Typography';
 import Stack from '@mui/joy/Stack';
 import Logo from '../../public/VA-AV.png';
+import Modal from '@mui/joy/Modal';
+import ModalDialog from '@mui/joy/ModalDialog';
+import ModalClose from '@mui/joy/ModalClose';
+
+
 
 import { issueAuth } from '../context/utils';
 import { DEBUG, type PageType } from '../App';
@@ -24,12 +29,61 @@ interface FormElements extends HTMLFormControlsCollection {
   persistent: HTMLInputElement;
 }
 
+function AboutUsModal({
+  open,
+  setOpen,
+}: { open: boolean; setOpen: React.Dispatch<React.SetStateAction<boolean>> }) {
+  return (
+    <Modal open={open} onClose={() => setOpen(false)}>
+      <ModalDialog size="lg" aria-labelledby="about-us"
+      sx={{
+        maxHeight: '80vh',
+        overflowY: 'auto',
+      }}>
+        <ModalClose  aria-label="Click about us" />
+        <Stack spacing={1}>
+          <Typography id="about-us" level="title-lg">
+            About Us
+          </Typography>
+          <Divider />
+
+          <Typography level="body-sm">
+            <strong>Very Awful Antivirus (VA-AV)</strong> wants to revolutionise 
+            how people interact with anti-virus software, large commertial solutions 
+            are too expensive and invasive for typical home uses, but home users still 
+            need something to help when they are not sure about a file! We have developed 
+            AI models to help determine if a Windows Portable Executable (.exe file) is 
+            malware and give a confidence score. We have integrated our AI with a slick 
+            web-based user interface that allows our customers to upload files from anywhere.
+          </Typography>
+
+          <Divider />
+
+          <Typography level="title-sm">Privacy Policy</Typography>
+          <Typography level="body-sm">
+          Very Awful Antivirus (VA-AV) does not keep record of your name, email or any other personal identifiable information,
+          we do however store file paths to the files uploaded to our solution, which may include your name if the username
+          includes your name. The file paths uploaded are not associated with any other identifiable information and cannot be
+          accessed by other users. We will not sell any of the information and/or data uploaded to VA-AV or otherwise collected by VA-AV.
+          </Typography>
+
+
+          <Typography level="body-sm">
+          Questions, concerns or clarifications can be addressed to: <strong>Zach Slaney</strong> -{' '}
+          <Link underline="always" href="mailto:103612275@student.swin.edu.au">103612275@student.swin.edu.au</Link>
+          </Typography>
+        </Stack>
+      </ModalDialog>
+    </Modal>
+  );
+}
 
 
 const customTheme = extendTheme({});
 
 export default function Login({ setPage }: { setPage: React.Dispatch<React.SetStateAction<PageType>> }) {
   const [loading, setLoading] = React.useState(false);
+  const [aboutOpen, setAboutOpen] = React.useState(false);
 
   const handleLogin = async (username: string, password: string) => {
     try {
@@ -150,6 +204,10 @@ export default function Login({ setPage }: { setPage: React.Dispatch<React.SetSt
                   <Button type="submit" fullWidth loading={loading}>
                     Sign in
                   </Button>
+
+                  <Button size="sm" variant="plain" onClick={() => setAboutOpen(true)}>
+                    About us & Privacy
+                  </Button>
                 </Stack>
               </form>
             </Stack>
@@ -162,6 +220,7 @@ export default function Login({ setPage }: { setPage: React.Dispatch<React.SetSt
         </Box>
       </Box>
 
+      <AboutUsModal open={aboutOpen} setOpen={setAboutOpen} />
     </CssVarsProvider >
   );
 }
