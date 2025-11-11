@@ -84,7 +84,10 @@ const customTheme = extendTheme({});
 export default function Login({ setPage }: { setPage: React.Dispatch<React.SetStateAction<PageType>> }) {
   const [loading, setLoading] = React.useState(false);
   const [aboutOpen, setAboutOpen] = React.useState(false);
+  const WALLPAPER_URL = '/steve-johnson-hokONTrHIAQ-unsplash.jpg';
 
+  ///scott-rodgerson-PSpf_XgOM5w-unsplash
+  ///steve-johnson-hokONTrHIAQ-unsplash.jpg
   const handleLogin = async (username: string, password: string) => {
     try {
       setLoading(true);
@@ -114,6 +117,27 @@ export default function Login({ setPage }: { setPage: React.Dispatch<React.SetSt
             '--Transition-duration': '0.4s', // set to `none` to disable transition
           },
         }}
+      />
+    <Box
+      sx={{
+        position: 'relative',
+        minHeight: '100dvh',
+        backgroundImage: `url(${WALLPAPER_URL})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        p: { xs: 2, sm: 4 }, // padding scales for phone/desktop
+      }}
+    >
+      <img
+        src={WALLPAPER_URL}
+        alt="photo published by Steve Johnson
+        published on Feb 10, 2018
+        Free to use under the Unsplash License"
+        style={{ display: 'none' }}
       />
       <Box
         sx={(theme) => ({
@@ -145,9 +169,32 @@ export default function Login({ setPage }: { setPage: React.Dispatch<React.SetSt
             sx={{ py: 3, display: 'flex', justifyContent: 'space-between' }}
           >
             <Box sx={{ gap: 2, display: 'flex', alignItems: 'center' }}>
-              <IconButton variant="soft" color="primary" size="sm">
-                <img src={Logo} width={120} />
-              </IconButton>
+              <Box
+                sx={{
+                  width: { xs: 80, sm: 100, md: 130 },
+                  height: { xs: 80, sm: 100, md: 130 },
+                  borderRadius: '50%',
+                  overflow: 'hidden',
+                  flexShrink: 0,
+                  backgroundColor: 'rgba(254, 254, 254, 0.77)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 4px 10px rgba(0, 0, 0, 0.25)',
+                  p: { xs: 1, sm: 1.5, md: 2 },
+                }}
+              >
+                <img
+                  src={Logo}
+                  alt="Very Awful AntiVirus Logo"
+                  style={{ 
+                    width: '100%', 
+                    height: '100%', 
+                    objectFit: 'contain',
+                    display: 'block',
+                  }}
+                />
+              </Box>
               <Typography level="title-lg">Very Awful AntiVirus</Typography>
             </Box>
 
@@ -219,6 +266,7 @@ export default function Login({ setPage }: { setPage: React.Dispatch<React.SetSt
           </Box>
         </Box>
       </Box>
+    </Box>
 
       <AboutUsModal open={aboutOpen} setOpen={setAboutOpen} />
     </CssVarsProvider >
