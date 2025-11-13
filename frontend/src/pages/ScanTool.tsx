@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { CssVarsProvider } from '@mui/joy/styles';
 import {
-  CssBaseline, AspectRatio, Avatar, AvatarGroup, Box, Button, Card, CardOverflow, Typography,
-  IconButton, Divider, Sheet, List, ListItem, ListDivider, ListItemButton,
-  ListItemContent, Stack, Chip, Dropdown, Menu, MenuButton, MenuItem, CircularProgress, Grid, LinearProgress,
-  Stepper, Step, StepIndicator, Option,
+  CssBaseline, AspectRatio, Box, Button, Typography,
+  Divider, Sheet, 
+  Stack, Chip, CircularProgress, Grid, 
+  Stepper, Step, Option,
   Select
 } from '@mui/joy';
 
@@ -268,7 +268,6 @@ export default function ScanTool({ setPage }: { setPage: React.Dispatch<React.Se
 }
 
 import { uploadFile } from '../context/utils';
-import { getPermLevel } from '../context/utils';
 
 function FileUploadWindow() {
   const [files, open, reset] = useFileDialog();

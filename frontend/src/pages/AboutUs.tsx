@@ -16,8 +16,6 @@ import SmallTabBar from '../components/SmallTabBar';
 import Logo from '../../public/VA-AV.png';
 
 
-
-
 export default function AboutUs({setPage}: {setPage: React.Dispatch<React.SetStateAction<PageType>>}) {
   const [drawerOpen, setDrawerOpen] = React.useState(false);
   return (

@@ -4,8 +4,22 @@ import Table from '@mui/joy/Table';
 
 import FolderRoundedIcon from '@mui/icons-material/FolderRounded';
 import type { PageType } from '../App';
+import { setCurrentJob } from '../context/utils';
+const TEST = false;
 
 export default function JobsTable({ setPage }: { setPage: React.Dispatch<React.SetStateAction<PageType>> }) {
+
+  if (TEST) {
+    // Test mode logic here
+    const MovePage = (jobnumber: string) => {
+    // Logic to move to job details page
+
+    setCurrentJob(jobnumber);
+    setPage('scantool');
+    };
+    MovePage('1');
+  }
+
   return (
     <div>
       <Table

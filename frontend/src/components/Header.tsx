@@ -20,7 +20,7 @@ import LightModeRoundedIcon from '@mui/icons-material/LightModeRounded';
 import LanguageRoundedIcon from '@mui/icons-material/LanguageRounded';
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 import HelpRoundedIcon from '@mui/icons-material/HelpRounded';
-import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
+
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 

@@ -4,8 +4,6 @@ import {
   CssBaseline,
   AspectRatio,
   Box,
-  Card,
-  CardOverflow,
   Typography,
   Sheet,
   Stack,
@@ -16,7 +14,7 @@ import {
 import Layout from '../components/Layout';
 import Header from '../components/Header';
 import Navigation from '../components/Navigation';
-import JobsTable from '../components/JobsTable';
+//import JobsTable from '../components/JobsTable';
 import JobsList from '../components/JobsList';
 
 
@@ -25,45 +23,7 @@ import JobsList from '../components/JobsList';
 import { DEBUG, type PageType } from '../App';
 
 import SmallTabBar from '../components/SmallTabBar';
-const data = [
-  {
-    name: 'Page A',
-    uv: 400,
-    pv: 2400,
-    amt: 2400,
-  },
-  {
-    name: 'Page B',
-    uv: 300,
-    pv: 4567,
-    amt: 2400,
-  },
-  {
-    name: 'Page C',
-    uv: 320,
-    pv: 1398,
-    amt: 2400,
-  },
-  {
-    name: 'Page D',
-    uv: 200,
-    pv: 9800,
-    amt: 2400,
-  },
-  {
-    name: 'Page E',
-    uv: 278,
-    pv: 3908,
-    amt: 2400,
-  },
-  {
-    name: 'Page F',
-    uv: 189,
-    pv: 4800,
-    amt: 2400,
-  },
-];
-import { LineChart, Line, CartesianGrid, XAxis, YAxis, Legend, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, CartesianGrid, XAxis, YAxis, ResponsiveContainer } from 'recharts';
 import ScansTable from '../components/ScanTable';
 import { getSessionKey, queryScanDB } from '../context/utils';
 
@@ -87,7 +47,7 @@ export default function Analytics({ setPage }: { setPage: React.Dispatch<React.S
     // Fetch new data and update state
     queryScanDB({"filter": 100}).then((newData) => {
       const data:any[] = []
-      newData.forEach((item: any, index: number) => {
+      newData.forEach((item: any) => {
         data.push(item);
       });
       setData(data);

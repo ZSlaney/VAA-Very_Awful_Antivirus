@@ -15,9 +15,6 @@ import Logo from '../../public/VA-AV.png';
 import { issueAuth, setUser } from '../context/utils';
 import { DEBUG, type PageType } from '../App';
 
-
-
-
 const customTheme = extendTheme({});
 
 export default function Login({ setPage }: { setPage: React.Dispatch<React.SetStateAction<PageType>> }) {
