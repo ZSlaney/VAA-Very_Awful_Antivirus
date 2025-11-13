@@ -1,10 +1,12 @@
 import sqlite3
-from utils import hash_fns as hash
+from backend.utils import hash_fns as hash
+
+DATABASES_FOLDER = "./backend/databases/"
 
 #Return True for valid user or False for invalid
 #It is case senitive
 def login(usrname, password):
-    users = sqlite3.connect('./databases/users.db')
+    users = sqlite3.connect(DATABASES_FOLDER + 'users.db')
     u_cursor = users.cursor()
 
     u_cursor.execute('''
@@ -32,7 +34,7 @@ def login(usrname, password):
     return [False, 255]
 
 def check_existing_username(username):
-    users = sqlite3.connect('./databases/users.db')
+    users = sqlite3.connect(DATABASES_FOLDER + 'users.db')
     u_cursor = users.cursor()
     
     # Create a table
@@ -59,7 +61,7 @@ def check_existing_username(username):
 
     
 def newUser(Username, Password, Permission_Level):
-    users = sqlite3.connect('./databases/users.db')
+    users = sqlite3.connect(DATABASES_FOLDER + 'users.db')
     u_cursor = users.cursor()
 
     u_cursor.execute('''
@@ -94,7 +96,7 @@ def newUser(Username, Password, Permission_Level):
     return True
 
 def add_to_quarantine(user, path, filename):
-    db = sqlite3.connect('./databases/quar.db')
+    db = sqlite3.connect(DATABASES_FOLDER + 'quar.db')
     cursor = db.cursor()
 
     # Create a table
@@ -112,7 +114,7 @@ def add_to_quarantine(user, path, filename):
     db.close()
 
 def read_quarantine(user):
-    db = sqlite3.connect('./databases/quar.db')
+    db = sqlite3.connect(DATABASES_FOLDER + 'quar.db')
     cursor = db.cursor()
 
     # Create a table
@@ -131,7 +133,7 @@ def read_quarantine(user):
     return actions
 
 def add_to_scans(user, path, result, confidence, hash, timestamp, model):
-    db = sqlite3.connect('./databases/scans.db')
+    db = sqlite3.connect(DATABASES_FOLDER + 'scans.db')
     cursor = db.cursor()
 
     # Create a table
@@ -155,7 +157,7 @@ def add_to_scans(user, path, result, confidence, hash, timestamp, model):
     return p_id[0]
 
 def read_scans(user):
-    db = sqlite3.connect('./databases/scans.db')
+    db = sqlite3.connect(DATABASES_FOLDER + 'scans.db')
     cursor = db.cursor()
 
     # Create a table
@@ -183,7 +185,7 @@ def read_scans(user):
 # Debug Functions - Not to be used for production
 #------------------------------------------------
 def dump_users_db():
-    users = sqlite3.connect('./databases/users.db')
+    users = sqlite3.connect(DATABASES_FOLDER + 'users.db')
     u_cursor = users.cursor()
 
     u_cursor.execute('''SELECT * FROM users''')
@@ -193,7 +195,7 @@ def dump_users_db():
         print(row)
 
 def dump_quar_db():
-    db = sqlite3.connect('./databases/quar.db')
+    db = sqlite3.connect(DATABASES_FOLDER + 'quar.db')
     cursor = db.cursor()
     # Create a table
     cursor.execute('''
@@ -212,7 +214,7 @@ def dump_quar_db():
         print(row)
 
 def dump_scans_db():
-    db = sqlite3.connect('./databases/scans.db')
+    db = sqlite3.connect(DATABASES_FOLDER + 'scans.db')
     cursor = db.cursor()
     # Create a table
     cursor.execute('''

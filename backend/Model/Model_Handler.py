@@ -18,9 +18,9 @@ class ModelInterface:
         pass
 
 class ModelHandler:
-    from Model.randomforestv1 import handler as rf
-    from Model.logisticregressionv1 import handler as lr
-    from Model.preprocessing import PEExtract
+    from backend.Model.randomforestv1 import handler as rf
+    from backend.Model.logisticregressionv1 import handler as lr
+    from backend.Model.preprocessing import PEExtract
 
     AGE_OUT_S = 60
    

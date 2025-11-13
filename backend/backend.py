@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 from typing import List
 
 
-frontenddir = os.path.join(os.path.dirname(__file__), "frontend/dist")
+frontenddir = os.path.join(os.path.dirname(__file__), "../frontend/dist")
 
 ENABLE_DOCS = True
 

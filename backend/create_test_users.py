@@ -1,5 +1,5 @@
 import sqlite3
-from utils.hash_fns import *
+from backend.utils.hash_fns import *
 
 #Used to create the test accounts - Not apart of main programs
 

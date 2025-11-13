@@ -3,10 +3,10 @@
 import socket
 import uvicorn # ASGI server for FastAPI
 import os
-from backend import app
+from backend.backend import app
 import threading
-from utils import SQL_handler as sql
-from Model import Model_Handler as model
+from backend.utils import SQL_handler as sql
+from backend.Model import Model_Handler as model
 #from pystray import Icon as icon, Menu as menu, MenuItem as item
 import ssl
 from pathlib import Path

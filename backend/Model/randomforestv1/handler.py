@@ -2,7 +2,7 @@ import joblib
 from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import RandomForestClassifier
 import pandas as pd
-from Model.Model_Handler import ModelInterface
+from backend.Model.Model_Handler import ModelInterface
 import os
 
 PATH = os.path.dirname(os.path.abspath(__file__)) + "/random_forest.joblib"

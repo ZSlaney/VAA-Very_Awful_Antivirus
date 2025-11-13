@@ -2,7 +2,7 @@ import joblib
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import DBSCAN
 import pandas as pd
-from Model_Handler import ModelInterface
+from backend.Model.Model_Handler import ModelInterface
 import os
 import time
 
