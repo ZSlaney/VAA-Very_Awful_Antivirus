@@ -235,12 +235,12 @@ class VaaGovernor:
                 job_res["result"]["Confidence"] = "UNKNOWN"
 
             if (job_res["result"]["Classification"] == True):
-                job_res["result"]["Classification"] = "MALWARE"
+                result = "MALWARE"
             else:
-                job_res["result"]["Classification"] = "BENIGNWARE"
+                result = "BENIGNWARE"
             
 
-        scan = {"id": job_res["id"],"filename": job_res["filename"], "hash": job_res["hash"],"status": job_res["status"],"result": job_res["result"], "timestamp": job_res["timestamp"].strftime("%H:%M:%S"), "model_name": job_res["model_name"]}
+        scan = {"id": job_res["id"],"filename": job_res["filename"], "hash": job_res["hash"],"status": job_res["status"],"result": result, "timestamp": job_res["timestamp"].strftime("%H:%M:%S"), "model_name": job_res["model_name"]}
 
 
         #Return result
