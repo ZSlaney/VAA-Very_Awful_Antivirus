@@ -48,9 +48,9 @@ export default function ScansTable({ data }: { data: any[] }) {
                     {data.map((scan, index) => {
 
                         return (
-                            <tr key={index}>
+                            <tr key={data.length - index}>
                                 <td>
-                                    <Typography level="body-sm">{index}</Typography>
+                                    <Typography level="body-sm">{data.length - index}</Typography>
                                 </td>
                                 <td>
                                     <Typography level="body-sm">{scan.User}</Typography>
@@ -74,7 +74,7 @@ export default function ScansTable({ data }: { data: any[] }) {
                                     <Typography level="body-sm">{scan.Result.Confidence.toFixed(2)}%</Typography>
                                 </td>
                                 <td>
-                                    <Typography level="body-sm">{new Date(scan.timestamp).toLocaleString()}</Typography>
+                                    <Typography level="body-sm">{scan.timestamp}</Typography>
                                 </td>
                             </tr>
                         );

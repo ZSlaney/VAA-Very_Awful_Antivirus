@@ -196,7 +196,7 @@ class Processor:
         self.process_pe_file(path)
         df = self.dict_to_pandas()
         df = self.ensure_columns(df)
-        df.to_csv("./backend/Model/preprocessing/pe_features.csv", index=False)
+        #df.to_csv("./backend/Model/preprocessing/pe_features.csv", index=False)
         self.pes = {}
         return df
 

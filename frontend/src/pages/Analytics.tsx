@@ -25,7 +25,6 @@ import { DEBUG, type PageType } from '../App';
 import SmallTabBar from '../components/SmallTabBar';
 
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
 interface malwareDetectionEntry {
   date: string;
@@ -72,6 +71,9 @@ export default function Analytics({ setPage }: { setPage: React.Dispatch<React.S
     // Fetch new data and update state
     queryScanDB({ "filter": 100 }).then((newData) => {
       const maindata: any[] = newData;
+      //invert the data to have most recent last
+
+
       const malwareDetectionsData: malwareDetectionEntry[] = [];
       const scanConfidenceData: scanConfidenceEntry[] = [];
       const mostUsedModelData: modelUsageEntry[] = [];
@@ -80,26 +82,30 @@ export default function Analytics({ setPage }: { setPage: React.Dispatch<React.S
 
       for (let i = 0; i < maindata.length; i++) {
         const entry = maindata[i];
+        const date = entry.timestamp.split(',')[0]; // Extract date portion
         if (entry.Result.Classification === 'MALWARE') {
-          const date = new Date(entry.Timestamp).toLocaleDateString();
           const existingEntry = malwareDetectionsData.find((e) => e.date === date);
           if (existingEntry) {
             existingEntry.count += 1;
           } else {
             malwareDetectionsData.push({ date, count: 1 });
           }
+        } else {
+          const existingEntry = malwareDetectionsData.find((e) => e.date === date);
+          if (!existingEntry) {
+            malwareDetectionsData.push({ date, count: 0 });
+          }
         }
       }
+      setMalwareDetections(malwareDetectionsData.reverse());
+      console.log('Analytics page - processed malware detections data:', malwareDetectionsData);
       setData(maindata);
       console.log('Analytics page - fetched scan data:', maindata);
-      //sort malwareDetectionsData by date
-      malwareDetectionsData.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-      console.log('Analytics page - processed malware detections data:', malwareDetectionsData);
-      setMalwareDetections(malwareDetectionsData);
-      //process scan confidence data
+
+
       for (let i = 0; i < maindata.length; i++) {
-        const entry = maindata[i];
-        scanConfidenceData.push({ index: i, confidence: entry.Result.Confidence });
+        const entry = maindata[maindata.length - 1 - i];
+        scanConfidenceData.push({ index: i+1, confidence: entry.Result.Confidence });
       }
       setScanConfidence(scanConfidenceData);
       console.log('Analytics page - processed scan confidence data:', scanConfidenceData);
@@ -183,17 +189,12 @@ export default function Analytics({ setPage }: { setPage: React.Dispatch<React.S
                   <Box sx={{ width: '50%', height: '50%', display: 'flex', alignItems: 'center', mb: 2 }}>
                     <ResponsiveContainer width="90%" height="90%">
                       <BarChart
-                      
-                        
                         data={malwareDetections}
-                        
                       >
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="date" />
-                        <YAxis width="auto" />
-                        <Tooltip />
-                       
-                        <Bar dataKey="detections" fill="#8884d8" activeBar={<Rectangle fill="pink" stroke="blue" />} />
+                        <YAxis width="auto" dataKey="count" />
+                        <Bar dataKey="count" fill="#8884d8" activeBar={<Rectangle fill="pink" stroke="blue" />} />
                       </BarChart>
                     </ResponsiveContainer>
                   </Box>

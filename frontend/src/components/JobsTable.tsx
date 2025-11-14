@@ -7,7 +7,7 @@ import type { PageType } from '../App';
 import { setCurrentJob } from '../context/utils';
 const TEST = false;
 
-export default function JobsTable({ setPage }: { setPage: React.Dispatch<React.SetStateAction<PageType>> }) {
+export default function JobsTable({ setPage, jobs }: { setPage: React.Dispatch<React.SetStateAction<PageType>>, jobs: any[] }) {
 
   if (TEST) {
     // Test mode logic here
@@ -31,26 +31,26 @@ export default function JobsTable({ setPage }: { setPage: React.Dispatch<React.S
       >
         <thead>
           <tr>
-            <th>
+            <th style={{width: "15%"}}>
               <Typography level="title-sm">Job Number</Typography>
             </th>
-            <th>
+            <th style={{width: "70%"}}>
               <Typography
                 level="title-sm"
               >
-                File Path
+                File
               </Typography>
             </th>
-           
-            <th>
+            <th style={{width: "15%"}}>
               <Typography level="title-sm">Status</Typography>
             </th>
           </tr>
         </thead>
         <tbody>
-          <tr>
+          {jobs.map((job, index) => (
+          <tr key={index}>
             <td>
-              <Typography level="body-sm">1</Typography>
+              <Typography level="body-sm">{job.id}</Typography>
             </td>
             <td>
                <Typography
@@ -58,14 +58,14 @@ export default function JobsTable({ setPage }: { setPage: React.Dispatch<React.S
                 startDecorator={<FolderRoundedIcon color="primary" />}
                 sx={{ alignItems: 'flex-start' }}
               >
-                aFilePath
+                {job.filename}
               </Typography>
             </td>
-            
             <td>
-              <Typography level="body-sm">Pending</Typography>
+              <Typography level="body-sm">{job.status}</Typography>
             </td>
           </tr>
+          ))}
         </tbody>
       </Table>
     </div>

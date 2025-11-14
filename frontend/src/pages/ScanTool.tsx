@@ -2,8 +2,8 @@ import * as React from 'react';
 import { CssVarsProvider } from '@mui/joy/styles';
 import {
   CssBaseline, AspectRatio, Box, Button, Typography,
-  Divider, Sheet, 
-  Stack, Chip, CircularProgress, Grid, 
+  Divider, Sheet,
+  Stack, Chip, CircularProgress, Grid,
   Stepper, Step, Option,
   Select
 } from '@mui/joy';
@@ -24,19 +24,21 @@ import type { PageType } from '../App';
 
 interface Job {
   id: number;
-  model: string;
+  model_name: string;
   status: "Complete" | "Pending";
   result: {
     Classification: string;
     Confidence: number;
   };
   timestamp: string;
+  hash: string;
+  filename: string;
 }
 
 import { DEBUG } from '../App';
-import { getCurrentJob, getSessionKey, setCurrentJob, fetchJobDetails } from '../context/utils';
+import { getCurrentJob, getSessionKey, setCurrentJob, fetchJobDetails, queryScanDB } from '../context/utils';
 
-import { LineChart, Line, XAxis, CartesianGrid, ResponsiveContainer, YAxis } from 'recharts';
+import { LineChart, Line, XAxis, CartesianGrid, ResponsiveContainer, YAxis, Tooltip } from 'recharts';
 
 const data = [
   {
@@ -71,6 +73,9 @@ export default function ScanTool({ setPage }: { setPage: React.Dispatch<React.Se
   const [currentJob, setCurrentJob] = React.useState<Job | null>(null);
   const [result, setResult] = React.useState<string>('');
   const [confidence, setConfidence] = React.useState<number>(0);
+  const [step, setStep] = React.useState<number>(0);
+  const [fileHistory, setFileHistory] = React.useState<any[]>([]);
+  const fetchedForJobId = React.useRef<number | null>(null);
 
   //if session key is invalid, redirect to login page
   if (DEBUG) {
@@ -86,16 +91,66 @@ export default function ScanTool({ setPage }: { setPage: React.Dispatch<React.Se
   }
   const fetchJob = (job: number) => {
     fetchJobDetails(job).then((data) => {
-          console.log('Fetched job details:', data);
-          setCurrentJob(data);
-        }).catch((error) => {
-          console.error('Error fetching job details:', error);
-        });
+      console.log('Fetched job details:', data);
+
+      setCurrentJob(prev => {
+        // if prev is null, accept new data
+        if (!prev) return data;
+        const sameId = prev.id === data.id;
+        const sameStatus = prev.status === data.status;
+        const sameTimestamp = prev.timestamp === data.timestamp;
+        const sameResultConfidence = prev.result?.Confidence === data.result?.Confidence;
+        const sameResultClass = prev.result?.Classification === data.result?.Classification;
+        const sameHash = prev.hash === data.hash;
+        const sameFilename = prev.filename === data.filename;
+
+        if (sameId && sameStatus && sameTimestamp && sameResultConfidence && sameResultClass && sameHash && sameFilename) {
+          return prev;
+        }
+        return data;
+      });
+    }).catch((error) => {
+      console.error('Error fetching job details:', error);
+    });
   };
   React.useEffect(() => {
-    if (currentJob) {
+    if (!currentJob) return;
+
+    if (currentJob.status === "Complete") {
+      setStep(4);
       setResult(currentJob.result.Classification);
       setConfidence(currentJob.result.Confidence);
+
+      // Fetch history once per job id
+      if (fetchedForJobId.current !== currentJob.id) {
+        fetchedForJobId.current = currentJob.id;
+
+        const hash = currentJob.hash;
+        const newdata: { date: string; confidence: number, result: string }[] = [];
+        queryScanDB({ filter: 100 })
+          .then((newData) => {
+            // invert the data to have most recent last
+            const maindata: any[] = newData.reverse();
+            for (let i =0; i < maindata.length; i++) {
+              const entry = maindata[i];
+              if (entry.hash == hash) {
+                const date = entry.timestamp;
+                const cls = entry.Result.Classification;
+                if (cls == "BENIGNWARE") {
+                  newdata.push({ date: date, confidence: entry.Result.Confidence, result: cls });
+                } else {
+                  newdata.push({ date: date, confidence: -entry.Result.Confidence, result: cls });
+                }
+              }
+            }
+            setFileHistory(newdata);
+          })
+          .catch((error) => {
+            console.error('Error fetching scan DB data:', error);
+          });
+      }
+    } else if (currentJob.status === "Pending") {
+      setStep(2);
     }
   }, [currentJob]);
 
@@ -103,10 +158,10 @@ export default function ScanTool({ setPage }: { setPage: React.Dispatch<React.Se
     let interval = setInterval(() => {
       const job = getCurrentJob(); //returns number
       console.log('Current job number:', job);
-      if (job !== null){
+      if (job !== null) {
         fetchJob(Number(job));
       }
-      }, 2000);
+    }, 2000);
     return () => {
       if (interval !== undefined) {
         clearInterval(interval);
@@ -170,21 +225,25 @@ export default function ScanTool({ setPage }: { setPage: React.Dispatch<React.Se
                     <Stepper size="lg" sx={{ mb: 1 }}>
                       <Step
                         indicator={
-                          <CircularProgress size="sm" determinate={true}>
+                          <CircularProgress
+                            size="sm"
+                            determinate={!(step > 0 && step < 2)}
+                            value={step < 1 ? 0 : step === 1 ? 25 : 100}
+                          >
                             <Typography level="body-xs" sx={{ color: 'white' }}>1</Typography>
                           </CircularProgress>
                         }
                       >Loading File</Step>
                       <Step
                         indicator={
-                          <CircularProgress size="sm" determinate={true}>
+                          <CircularProgress size="sm" determinate={!(step > 1 && step < 3)} value={step < 2 ? 0 : step === 2 ? 25 : 100}>
                             <Typography level="body-xs" sx={{ color: 'white' }}>2</Typography>
                           </CircularProgress>
                         }
                       >Executing Model</Step>
                       <Step
                         indicator={
-                          <CircularProgress size="sm" determinate={true}>
+                          <CircularProgress size="sm" determinate={!(step > 2 && step < 4)} value={step < 3 ? 0 : step === 3 ? 25 : 100}>
                             <Typography level="body-xs" sx={{ color: 'white' }}>3</Typography>
                           </CircularProgress>
 
@@ -194,8 +253,8 @@ export default function ScanTool({ setPage }: { setPage: React.Dispatch<React.Se
 
                   </Stack>
                 </Grid>
-                {currentJob  && <>
-                <Grid xs={12} md={4}>
+                {currentJob?.status == "Complete" && <>
+                  <Grid xs={12} md={4}>
                     <Typography level="body-sm" sx={{ color: 'text.secondary' }}>
                       JobNumber
                     </Typography>
@@ -207,7 +266,7 @@ export default function ScanTool({ setPage }: { setPage: React.Dispatch<React.Se
                       Model
                     </Typography>
                     <Divider sx={{ my: 1 }} />
-                    <Typography level="h4">{currentJob?.model ? currentJob.model : 'Unknown'}</Typography>
+                    <Typography level="h4">{currentJob?.model_name ? currentJob.model_name : 'Unknown'}</Typography>
                   </Grid>
                   <Grid xs={12} md={4}>
                     <Typography level="body-sm" sx={{ color: 'text.secondary' }}>
@@ -221,47 +280,48 @@ export default function ScanTool({ setPage }: { setPage: React.Dispatch<React.Se
                       color="primary"
                       sx={{ fontWeight: '600' }}
                     >
-                      Confidence: { confidence ? `${confidence}%` : 'Unknown'}
+                      Confidence: {confidence ? `${confidence.toFixed(2)}%` : 'Unknown'}
                     </Chip>
                   </Grid>
                 </>}
               </Grid>
 
             </Sheet>
-            <Sheet
-              variant="outlined"
-              sx={{
-                borderRadius: 'sm',
-                gridColumn: '1/-1',
-                display: { xs: 'none', md: 'flex' },
-              }}
-            >
-              <Stack justifyContent="space-between" sx={{ p: 1, width: '100%', height: '100%' }}>
-                <Typography level="title-md" sx={{ mb: 1 }}>
-                  File History
-                </Typography>
-                <Divider sx={{ mb: 1 }} />
-                <AspectRatio ratio="16/9" color="neutral" sx={{ borderRadius: 0 }}>
-                  <Box sx={{ width: '90%', height: '90%', display: 'flex', alignItems: 'center', mb: 2 }}>
-                    <ResponsiveContainer width="90%" height="90%">
-                      <LineChart
-                        data={data}
-
-                      >
-                        <CartesianGrid stroke="#aaa" strokeDasharray="5 5" />
-                        <Line type="monotone" dataKey="uv" stroke="purple" strokeWidth={2} name="My data series name" />
-                        <XAxis dataKey="name" />
-                        <YAxis  />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </Box>
-                </AspectRatio>
-              </Stack>
-            </Sheet>
-
+            {currentJob?.status == "Complete" &&
+              <Sheet
+                variant="outlined"
+                sx={{
+                  borderRadius: 'sm',
+                  gridColumn: '1/-1',
+                  display: { xs: 'none', md: 'flex' },
+                }}
+              >
+                <Stack justifyContent="space-between" sx={{ p: 1, width: '100%', height: '100%' }}>
+                  <Typography level="title-md" sx={{ mb: 1 }}>
+                    File History
+                  </Typography>
+                  <Divider sx={{ mb: 1 }} />
+                  <AspectRatio ratio="16/9" color="neutral" sx={{ borderRadius: 0 }}>
+                    <Box sx={{ width: '90%', height: '90%', display: 'flex', alignItems: 'center', mb: 2 }}>
+                      <ResponsiveContainer width="90%" height="90%">
+                        <LineChart
+                          data={fileHistory}
+                        >
+                          <CartesianGrid stroke="#aaa" strokeDasharray="5 5" />
+                          <Line type="monotone" dataKey="confidence" stroke="purple" strokeWidth={2} name={currentJob?.filename} />
+                          <XAxis dataKey="date" />
+                          <YAxis allowDataOverflow dataKey="confidence" domain={['auto', 'auto']} />
+                          <Tooltip />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </Box>
+                  </AspectRatio>
+                </Stack>
+              </Sheet>
+            }
           </Box>
         </Layout.Main>
-        <FileUploadWindow  />
+        <FileUploadWindow setStep={setStep} />
       </Layout.Root>
     </CssVarsProvider>
   );
@@ -269,7 +329,7 @@ export default function ScanTool({ setPage }: { setPage: React.Dispatch<React.Se
 
 import { uploadFile } from '../context/utils';
 
-function FileUploadWindow() {
+function FileUploadWindow({ setStep }: { setStep: React.Dispatch<React.SetStateAction<number>> }) {
   const [files, open, reset] = useFileDialog();
   const [file, setFile] = React.useState<File | null>(null);
   const [modelName, setModelName] = React.useState<string>("RandomForestV1");
@@ -287,6 +347,7 @@ function FileUploadWindow() {
   const handleFileUpload = async () => {
     if (file) {
       // Here you can add code to handle the file upload, e.g., send it to the server
+      setStep && setStep(1); //move to step 1
       console.log('Uploading file:', file, 'with model:', modelName);
 
       try {
@@ -295,7 +356,7 @@ function FileUploadWindow() {
         setCurrentJob(result['Job Id']);
         //on successful upload, reset the file state and set the current job number
         setFile(null);
-        
+
         //setCurrentJobNumber(newJobNumber); //you need to implement getting the new job number after upload
       } catch (error) {
         console.error('Upload failed:', error);
@@ -360,7 +421,7 @@ function FileUploadWindow() {
           </Box>
           <Divider />
           <Box sx={{ py: 2, px: 1 }}>
-            <Select size="sm" defaultValue={"RandomForestV1"} onChange={(e, value) => { if (value) setModelName(value)}} startDecorator={"Model:"} endDecorator={< DeveloperBoardIcon /> }>
+            <Select size="sm" defaultValue={"RandomForestV1"} onChange={(e, value) => { if (value) setModelName(value) }} startDecorator={"Model:"} endDecorator={< DeveloperBoardIcon />}>
               <Option value={"RandomForestV1"}>Random Forest V1</Option> {/* Placeholder*/}
               <Option value={"LogisticRegressionV1"}>Logistic Regression V1</Option> {/* Placeholder*/}
             </Select>
