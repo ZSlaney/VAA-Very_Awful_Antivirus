@@ -272,6 +272,7 @@ import { uploadFile } from '../context/utils';
 function FileUploadWindow() {
   const [files, open, reset] = useFileDialog();
   const [file, setFile] = React.useState<File | null>(null);
+  const [modelName, setModelName] = React.useState<string>("RandomForestV1");
 
   React.useEffect(() => {
     if (files && files.length > 0) {
@@ -286,10 +287,10 @@ function FileUploadWindow() {
   const handleFileUpload = async () => {
     if (file) {
       // Here you can add code to handle the file upload, e.g., send it to the server
-      console.log('Uploading file:', file);
+      console.log('Uploading file:', file, 'with model:', modelName);
 
       try {
-        const result = await uploadFile(file);
+        const result = await uploadFile(file, modelName); // Use selected model name
         console.log('Upload successful:', result);
         setCurrentJob(result['Job Id']);
         //on successful upload, reset the file state and set the current job number
@@ -359,8 +360,9 @@ function FileUploadWindow() {
           </Box>
           <Divider />
           <Box sx={{ py: 2, px: 1 }}>
-            <Select size="sm" defaultValue={"RandomForestV1"} startDecorator={"Model:"} endDecorator={< DeveloperBoardIcon />}>
-              <Option value={"RandomForestV1"}>Random ForestV1</Option> {/* Placeholder*/}
+            <Select size="sm" defaultValue={"RandomForestV1"} onChange={(e, value) => { if (value) setModelName(value)}} startDecorator={"Model:"} endDecorator={< DeveloperBoardIcon /> }>
+              <Option value={"RandomForestV1"}>Random Forest V1</Option> {/* Placeholder*/}
+              <Option value={"LogisticRegressionV1"}>Logistic Regression V1</Option> {/* Placeholder*/}
             </Select>
           </Box>
           <Box sx={{ py: 2, px: 1 }}>

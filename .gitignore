@@ -32,3 +32,5 @@ Model/preprocessing/pe_features.csv
 #models
 *.joblib
 Model/preprocessing/ACCICONS.EXE
+backend/Model/preprocessing/pe_features.csv
+

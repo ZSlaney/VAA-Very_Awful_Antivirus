@@ -23,7 +23,27 @@ import JobsList from '../components/JobsList';
 import { DEBUG, type PageType } from '../App';
 
 import SmallTabBar from '../components/SmallTabBar';
-import { LineChart, Line, CartesianGrid, XAxis, YAxis, ResponsiveContainer } from 'recharts';
+
+
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
+
+interface malwareDetectionEntry {
+  date: string;
+  count: number;
+}
+interface scanConfidenceEntry {
+  index: number;
+  confidence: number;
+}
+interface jobsEntry {
+  date: string;
+  jobs: number;
+}
+interface modelUsageEntry {
+  model: string;
+  usage: number;
+}
+import { LineChart, Line, CartesianGrid, XAxis, YAxis, Legend, ResponsiveContainer, PieChart, BarChart, Bar, Pie, Rectangle, Tooltip } from 'recharts';
 import ScansTable from '../components/ScanTable';
 import { getSessionKey, queryScanDB } from '../context/utils';
 
@@ -31,6 +51,10 @@ import { getSessionKey, queryScanDB } from '../context/utils';
 export default function Analytics({ setPage }: { setPage: React.Dispatch<React.SetStateAction<PageType>> }) {
   const [drawerOpen, setDrawerOpen] = React.useState(false);
   const [data, setData] = React.useState<any[]>([]);
+  const [malwareDetections, setMalwareDetections] = React.useState<any[]>([]);
+  const [scanConfidence, setScanConfidence] = React.useState<any[]>([]);
+  const [jobsData, setJobsData] = React.useState<any[]>([]);
+  const [mostUsedModel, setMostUsedModel] = React.useState<any[]>([]);
   //if session key is invalid, redirect to login page
   if (DEBUG) {
     console.log('Rendering Dashboard component');
@@ -43,15 +67,61 @@ export default function Analytics({ setPage }: { setPage: React.Dispatch<React.S
       setPage('login');
     }
   }
+
   const updateData = () => {
     // Fetch new data and update state
-    queryScanDB({"filter": 100}).then((newData) => {
-      const data:any[] = []
-      newData.forEach((item: any) => {
-        data.push(item);
-      });
-      setData(data);
+    queryScanDB({ "filter": 100 }).then((newData) => {
+      const maindata: any[] = newData;
+      const malwareDetectionsData: malwareDetectionEntry[] = [];
+      const scanConfidenceData: scanConfidenceEntry[] = [];
+      const mostUsedModelData: modelUsageEntry[] = [];
+      //process newData to fill in the above arrays
+
+
+      for (let i = 0; i < maindata.length; i++) {
+        const entry = maindata[i];
+        if (entry.Result.Classification === 'MALWARE') {
+          const date = new Date(entry.Timestamp).toLocaleDateString();
+          const existingEntry = malwareDetectionsData.find((e) => e.date === date);
+          if (existingEntry) {
+            existingEntry.count += 1;
+          } else {
+            malwareDetectionsData.push({ date, count: 1 });
+          }
+        }
+      }
+      setData(maindata);
+      console.log('Analytics page - fetched scan data:', maindata);
+      //sort malwareDetectionsData by date
+      malwareDetectionsData.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      console.log('Analytics page - processed malware detections data:', malwareDetectionsData);
+      setMalwareDetections(malwareDetectionsData);
+      //process scan confidence data
+      for (let i = 0; i < maindata.length; i++) {
+        const entry = maindata[i];
+        scanConfidenceData.push({ index: i, confidence: entry.Result.Confidence });
+      }
+      setScanConfidence(scanConfidenceData);
+      console.log('Analytics page - processed scan confidence data:', scanConfidenceData);
+
+      //process most used model data
+      const modelUsageMap: { [key: string]: number } = {};
+      for (let i = 0; i < maindata.length; i++) {
+        const entry = maindata[i];
+        const model = entry.model_name;
+        if (model in modelUsageMap) {
+          modelUsageMap[model] += 1;
+        } else {
+          modelUsageMap[model] = 1;
+        }
+      }
+      for (const model in modelUsageMap) {
+        mostUsedModelData.push({ model, usage: modelUsageMap[model] });
+      }
+      setMostUsedModel(mostUsedModelData);
+      console.log('Analytics page - processed most used model data:', mostUsedModelData);
     });
+
   };
   React.useEffect(() => {
     updateData();
@@ -112,14 +182,19 @@ export default function Analytics({ setPage }: { setPage: React.Dispatch<React.S
                 <AspectRatio ratio="16/9" color="neutral" sx={{ borderRadius: 0 }}>
                   <Box sx={{ width: '50%', height: '50%', display: 'flex', alignItems: 'center', mb: 2 }}>
                     <ResponsiveContainer width="90%" height="90%">
-                      <LineChart
-                       
-
+                      <BarChart
+                      
+                        
+                        data={malwareDetections}
+                        
                       >
-                        <CartesianGrid stroke="#aaa" strokeDasharray="5 5" />
-                        <Line type="monotone" dataKey="uv" stroke="purple" strokeWidth={2} name="My data series name" />
-                        <XAxis dataKey="name" />
-                      </LineChart>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="date" />
+                        <YAxis width="auto" />
+                        <Tooltip />
+                       
+                        <Bar dataKey="detections" fill="#8884d8" activeBar={<Rectangle fill="pink" stroke="blue" />} />
+                      </BarChart>
                     </ResponsiveContainer>
                   </Box>
                 </AspectRatio>
@@ -141,40 +216,12 @@ export default function Analytics({ setPage }: { setPage: React.Dispatch<React.S
                   <Box sx={{ width: '50%', height: '50%', display: 'flex', alignItems: 'center', mb: 2 }}>
                     <ResponsiveContainer width="90%" height="90%">
                       <LineChart
-                        
+                        data={scanConfidence}
                       >
                         <CartesianGrid stroke="#aaa" strokeDasharray="5 5" />
-                        <Line type="monotone" dataKey="uv" stroke="purple" strokeWidth={2} name="My data series name" />
-                        <XAxis dataKey="name" />
-                        <YAxis />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </Box>
-                </AspectRatio>
-              </Stack>
-            </Sheet>
-            <Sheet
-              variant="outlined"
-              sx={{
-                borderRadius: 'sm',
-                display: { xs: 'none', md: 'flex' },
-                width: '100%',
-              }}
-            >
-              <Stack justifyContent="space-between" sx={{ p: 1, width: '100%' }}>
-                <Typography level="title-md" sx={{ mt: 1, ml: 1, mb: 1 }}>
-                  Jobs
-                </Typography>
-                <AspectRatio ratio="16/9" color="neutral" sx={{ borderRadius: 0 }}>
-                  <Box sx={{ width: '50%', height: '50%', display: 'flex', alignItems: 'center', mb: 2 }}>
-                    <ResponsiveContainer width="90%" height="90%">
-                      <LineChart
-                       
-                      >
-                        <CartesianGrid stroke="#aaa" strokeDasharray="5 5" />
-                        <Line type="monotone" dataKey="uv" stroke="purple" strokeWidth={2} name="My data series name" />
-                        <XAxis dataKey="name" />
-                         <YAxis />
+                        <Line type="monotone" dataKey="confidence" stroke="purple" strokeWidth={2} name="Confidence" />
+                        <XAxis dataKey="index" />
+                        <YAxis name="confidence" dataKey="confidence"/>
                       </LineChart>
                     </ResponsiveContainer>
                   </Box>
@@ -196,13 +243,13 @@ export default function Analytics({ setPage }: { setPage: React.Dispatch<React.S
                 <AspectRatio ratio="16/9" color="neutral" sx={{ borderRadius: 0 }}>
                   <Box sx={{ width: '50%', height: '50%', display: 'flex', alignItems: 'center', mb: 2 }}>
                     <ResponsiveContainer width="95%" height="95%">
-                      <LineChart
-                        
+                      <PieChart
+                        data={mostUsedModel}
                       >
-                        <CartesianGrid stroke="#aaa" strokeDasharray="5 5" />
-                        <Line type="monotone" dataKey="uv" stroke="purple" strokeWidth={2} name="My data series name" />
-                        <XAxis dataKey="name" />
-                      </LineChart>
+                        <Pie type='' dataKey="usage" nameKey="model" />
+                        <Legend />
+                        <Tooltip />
+                      </PieChart>
                     </ResponsiveContainer>
                   </Box>
                 </AspectRatio>

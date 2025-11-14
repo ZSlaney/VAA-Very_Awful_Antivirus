@@ -176,12 +176,13 @@ export function setCurrentJob(jobnumber: string | null): void {
   }
 }
 
-export function uploadFile(file: File): Promise<any> {
+export function uploadFile(file: File, model_name: string): Promise<any> {
   const sessionKey = getSessionKey();
   const perm_level = getPermLevel();
   const formData = new FormData();
   formData.append('key', sessionKey ? sessionKey : 'sdsd');
   formData.append('perm_level', perm_level ? perm_level : 'adasdad');
+  formData.append('model_name', model_name);
   formData.append('file', file);
   console.log('Uploading file with session key:', formData);
   return fetch('/api/scan/add', {
