@@ -231,13 +231,16 @@ class VaaGovernor:
         if job_res["status"] == "pending":
             job_res["result"] = {"Classification":"IN PROGRESS", "Confidence": "IN PROGRESS"}
         else:
-            if job_res["result"]["Confidence"] == -1:
-                job_res["result"]["Confidence"] = "UNKNOWN"
-
             if (job_res["result"]["Classification"] == True):
-                result = "MALWARE"
+                if job_res["result"]["Confidence"] == -1:
+                    result = {"Classification":"MALWARE", "Confidence":"UNKNOWN"}
+                else:
+                    result = {"Classification":"MALWARE", "Confidence":job_res["result"]["Confidence"]}
             else:
-                result = "BENIGNWARE"
+                if job_res["result"]["Confidence"] == -1:
+                    result = {"Classification":"BENIGNWARE", "Confidence":"UNKNOWN"}
+                else:
+                    result = {"Classification":"BENIGNWARE", "Confidence":job_res["result"]["Confidence"]}
             
 
         scan = {"id": job_res["id"],"filename": job_res["filename"], "hash": job_res["hash"],"status": job_res["status"],"result": result, "timestamp": job_res["timestamp"].strftime("%H:%M:%S"), "model_name": job_res["model_name"]}
