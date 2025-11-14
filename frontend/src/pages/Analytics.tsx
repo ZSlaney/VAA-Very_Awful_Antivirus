@@ -34,15 +34,11 @@ interface scanConfidenceEntry {
   index: number;
   confidence: number;
 }
-interface jobsEntry {
-  date: string;
-  jobs: number;
-}
 interface modelUsageEntry {
   model: string;
   usage: number;
 }
-import { LineChart, Line, CartesianGrid, XAxis, YAxis, Legend, ResponsiveContainer, PieChart, BarChart, Bar, Pie, Rectangle, Tooltip } from 'recharts';
+import { LineChart, Line, CartesianGrid, XAxis, YAxis, Legend, ResponsiveContainer, PieChart, BarChart, Bar, Pie, Rectangle, Tooltip, Cell } from 'recharts';
 import ScansTable from '../components/ScanTable';
 import { getSessionKey, queryScanDB } from '../context/utils';
 
@@ -52,7 +48,6 @@ export default function Analytics({ setPage }: { setPage: React.Dispatch<React.S
   const [data, setData] = React.useState<any[]>([]);
   const [malwareDetections, setMalwareDetections] = React.useState<any[]>([]);
   const [scanConfidence, setScanConfidence] = React.useState<any[]>([]);
-  const [jobsData, setJobsData] = React.useState<any[]>([]);
   const [mostUsedModel, setMostUsedModel] = React.useState<any[]>([]);
   //if session key is invalid, redirect to login page
   if (DEBUG) {
@@ -219,10 +214,10 @@ export default function Analytics({ setPage }: { setPage: React.Dispatch<React.S
                       <LineChart
                         data={scanConfidence}
                       >
-                        <CartesianGrid stroke="#aaa" strokeDasharray="5 5" />
-                        <Line type="monotone" dataKey="confidence" stroke="purple" strokeWidth={2} name="Confidence" />
+                        <CartesianGrid stroke="#aaa" />
+                        <Line type="monotone" dataKey="confidence" stroke="purple" strokeWidth={2} label="Confidence" orientation={'vertcal'} />
                         <XAxis dataKey="index" />
-                        <YAxis name="confidence" dataKey="confidence"/>
+                        <YAxis name="confidence" dataKey="confidence" width="auto" domain={['auto', 'auto']}/>
                       </LineChart>
                     </ResponsiveContainer>
                   </Box>
@@ -246,8 +241,13 @@ export default function Analytics({ setPage }: { setPage: React.Dispatch<React.S
                     <ResponsiveContainer width="95%" height="95%">
                       <PieChart
                         data={mostUsedModel}
+                        
                       >
-                        <Pie type='' dataKey="usage" nameKey="model" />
+                        <Pie type='' dataKey="usage" nameKey="model">
+                          {mostUsedModel.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={['#8884d8', '#82ca9d', '#ffc658', '#ff8042', '#8dd1e1'][index % 5]} />
+                          ))}
+                        </Pie>
                         <Legend />
                         <Tooltip />
                       </PieChart>

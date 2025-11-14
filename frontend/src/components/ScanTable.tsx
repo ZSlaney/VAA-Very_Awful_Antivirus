@@ -18,25 +18,25 @@ export default function ScansTable({ data }: { data: any[] }) {
                 <thead>
                     <tr>
                         <th style={{width: '5%'}}>
-                            <Typography level="title-sm">Scan Id</Typography>
+                            <Typography level="title-sm">Id</Typography>
                         </th>
                         <th style={{width: '10%'}}>
                             <Typography level="title-sm">User</Typography>
                         </th>
-                        <th style={{width: '30%'}}>
+                        <th style={{width: '35%'}}>
                             <Typography
                                 level="title-sm"
                             >
                                 File Path
                             </Typography>
                         </th>
-                        <th style={{width: '20%'}}>
+                        <th style={{width: '16%'}}>
                             <Typography level="title-sm">ModelName</Typography>
                         </th>
                         <th style={{width: '5%'}}>
                             <Typography level="title-sm">Result</Typography>
                         </th>
-                        <th style={{width: '10%'}}>
+                        <th style={{width: '9%'}}>
                             <Typography level="title-sm">Confidence</Typography>
                         </th>
                         <th style={{width: '10%'}}>
