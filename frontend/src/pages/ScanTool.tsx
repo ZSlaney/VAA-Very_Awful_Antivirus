@@ -131,7 +131,7 @@ export default function ScanTool({ setPage }: { setPage: React.Dispatch<React.Se
           .then((newData) => {
             // invert the data to have most recent last
             const maindata: any[] = newData.reverse();
-            for (let i =0; i < maindata.length; i++) {
+            for (let i = 0; i < maindata.length; i++) {
               const entry = maindata[i];
               if (entry.hash == hash) {
                 const date = entry.timestamp;
@@ -216,7 +216,7 @@ export default function ScanTool({ setPage }: { setPage: React.Dispatch<React.Se
               sx={{
                 borderRadius: 'sm',
                 gridColumn: '1/-1',
-                display: { xs: 'none', md: 'flex' },
+                display: { xs: 'flex', md: 'flex' },
               }}
             >
               <Grid container spacing={2} sx={{ p: 2, width: '100%' }}>
@@ -319,9 +319,33 @@ export default function ScanTool({ setPage }: { setPage: React.Dispatch<React.Se
                 </Stack>
               </Sheet>
             }
+            <Sheet
+              variant="outlined"
+              sx={{
+                borderRadius: 'sm',
+                display: { xs: 'flex', md: 'none' },
+                flexDirection: 'column',
+                alignItems: 'stretch',
+                gap: 1,
+                p: 1,
+                width: '100%',
+                mb: 10,
+              }}
+            >
+              <FileUploadWindow setStep={setStep} />
+            </Sheet>
           </Box>
         </Layout.Main>
-        <FileUploadWindow setStep={setStep} />
+        <Sheet
+          sx={{
+            display: { xs: 'none', sm: 'initial' },
+            borderLeft: '1px solid',
+            borderColor: 'divider',
+          }}
+        >
+          <FileUploadWindow setStep={setStep} />
+        </Sheet>
+
       </Layout.Root>
     </CssVarsProvider>
   );
@@ -367,13 +391,7 @@ function FileUploadWindow({ setStep }: { setStep: React.Dispatch<React.SetStateA
 
 
   return (
-    <Sheet
-      sx={{
-        display: { xs: 'none', sm: 'initial' },
-        borderLeft: '1px solid',
-        borderColor: 'divider',
-      }}
-    >
+    <>
       <Box sx={{ p: 2, display: 'flex', alignItems: 'center' }}>
         <Typography level="title-md" sx={{ flex: 1 }}>
           File Upload
@@ -433,6 +451,6 @@ function FileUploadWindow({ setStep }: { setStep: React.Dispatch<React.SetStateA
           </Box>
         </>
       }
-    </Sheet>
+    </>
   )
 }
