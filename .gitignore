@@ -15,7 +15,6 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
-dist
 dist-ssr
 *.local
 
@@ -33,3 +32,4 @@ Model/preprocessing/pe_features.csv
 #models
 *.joblib
 Model/preprocessing/ACCICONS.EXE
+

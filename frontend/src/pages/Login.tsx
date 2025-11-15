@@ -4,12 +4,9 @@ import GlobalStyles from '@mui/joy/GlobalStyles';
 import CssBaseline from '@mui/joy/CssBaseline';
 import Box from '@mui/joy/Box';
 import Button from '@mui/joy/Button';
-import Checkbox from '@mui/joy/Checkbox';
 import Divider from '@mui/joy/Divider';
-import FormControl from '@mui/joy/FormControl';
 import FormLabel from '@mui/joy/FormLabel';
 import IconButton from '@mui/joy/IconButton';
-import Link from '@mui/joy/Link';
 import Input from '@mui/joy/Input';
 import Typography from '@mui/joy/Typography';
 import Stack from '@mui/joy/Stack';
@@ -20,9 +17,10 @@ import ModalClose from '@mui/joy/ModalClose';
 
 
 
-import { issueAuth } from '../context/utils';
+import { issueAuth, setUser } from '../context/utils';
 import { DEBUG, type PageType } from '../App';
 
+<<<<<<< HEAD
 interface FormElements extends HTMLFormControlsCollection {
   email: HTMLInputElement;
   password: HTMLInputElement;
@@ -79,12 +77,18 @@ function AboutUsModal({
 }
 
 
+=======
+>>>>>>> d48c0b0c7e8fdb7c20adbe71b9f87a6ae0d09018
 const customTheme = extendTheme({});
 
 export default function Login({ setPage }: { setPage: React.Dispatch<React.SetStateAction<PageType>> }) {
   const [loading, setLoading] = React.useState(false);
+<<<<<<< HEAD
   const [aboutOpen, setAboutOpen] = React.useState(false);
   const WALLPAPER_URL = '/steve-johnson-hokONTrHIAQ-unsplash.jpg';
+=======
+  const [error, setError] = React.useState<boolean>(false);
+>>>>>>> d48c0b0c7e8fdb7c20adbe71b9f87a6ae0d09018
 
   ///scott-rodgerson-PSpf_XgOM5w-unsplash
   ///steve-johnson-hokONTrHIAQ-unsplash.jpg
@@ -93,16 +97,26 @@ export default function Login({ setPage }: { setPage: React.Dispatch<React.SetSt
       setLoading(true);
       if (DEBUG) {
         console.log(`Attempting login with username: ${username} and password: ${password}`);
+        if (username == null || password == null) {
+          console.error('Username or password is null');
+          setError(true);
+          return;
+        }
+        setUser(username);
         setPage('dashboard');
       } else {
         const sessionKey = await issueAuth(username, password);
         if (sessionKey) {
+          setUser(username);
           setPage('dashboard');
+        } else {
+          setError(true);
         }
       }
 
     } catch (error) {
       console.error('Login failed:', error);
+      setError(true);
     } finally {
       setLoading(false);
     }
@@ -244,11 +258,11 @@ export default function Login({ setPage }: { setPage: React.Dispatch<React.SetSt
                 handleLogin(username, password);
               }} >
                 <FormLabel>Username</FormLabel>
-                <Input type="username" name="username" />
+                <Input required type="username" name="username" />
                 <FormLabel>Password</FormLabel>
-                <Input type="password" name="password" />
+                <Input required type="password" name="password" />
                 <Stack sx={{ gap: 4, mt: 2 }}>
-                  <Button type="submit" fullWidth loading={loading}>
+                  <Button type="submit" color={error ? 'danger' : "primary"} fullWidth loading={loading}>
                     Sign in
                   </Button>
 

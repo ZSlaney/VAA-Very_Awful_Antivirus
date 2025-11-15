@@ -1,16 +1,12 @@
 import * as React from 'react';
-import Box from '@mui/joy/Box';
 import List from '@mui/joy/List';
 import ListSubheader from '@mui/joy/ListSubheader';
 import ListItem from '@mui/joy/ListItem';
 import ListItemButton from '@mui/joy/ListItemButton';
 import ListItemDecorator from '@mui/joy/ListItemDecorator';
 import ListItemContent from '@mui/joy/ListItemContent';
-import SettingsPowerIcon from '@mui/icons-material/SettingsPower';
-import SdCardAlertIcon from '@mui/icons-material/SdCardAlert';
 import EventNoteIcon from '@mui/icons-material/EventNote';
-import FindInPageIcon from '@mui/icons-material/FindInPage';
-import { Modal, ModalDialog,ModalClose, Typography, Divider } from '@mui/joy';
+
 import LogsModal from './LogsModal';
 
 export default function SideDrawer() {

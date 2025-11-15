@@ -1,6 +1,6 @@
 #main entry point for VAA - VeryAwfulAntivirus
-from vaa_governor import VaaGovernor
-from backend import app
+from backend.vaa_governor import VaaGovernor
+from backend.backend import app
 import logging
 logging.basicConfig(level=logging.INFO)
 

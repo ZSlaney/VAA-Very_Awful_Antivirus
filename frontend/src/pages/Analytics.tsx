@@ -4,8 +4,6 @@ import {
   CssBaseline,
   AspectRatio,
   Box,
-  Card,
-  CardOverflow,
   Typography,
   Sheet,
   Stack,
@@ -16,7 +14,7 @@ import {
 import Layout from '../components/Layout';
 import Header from '../components/Header';
 import Navigation from '../components/Navigation';
-import JobsTable from '../components/JobsTable';
+//import JobsTable from '../components/JobsTable';
 import JobsList from '../components/JobsList';
 
 
@@ -25,51 +23,32 @@ import JobsList from '../components/JobsList';
 import { DEBUG, type PageType } from '../App';
 
 import SmallTabBar from '../components/SmallTabBar';
-const data = [
-  {
-    name: 'Page A',
-    uv: 400,
-    pv: 2400,
-    amt: 2400,
-  },
-  {
-    name: 'Page B',
-    uv: 300,
-    pv: 4567,
-    amt: 2400,
-  },
-  {
-    name: 'Page C',
-    uv: 320,
-    pv: 1398,
-    amt: 2400,
-  },
-  {
-    name: 'Page D',
-    uv: 200,
-    pv: 9800,
-    amt: 2400,
-  },
-  {
-    name: 'Page E',
-    uv: 278,
-    pv: 3908,
-    amt: 2400,
-  },
-  {
-    name: 'Page F',
-    uv: 189,
-    pv: 4800,
-    amt: 2400,
-  },
-];
-import { LineChart, Line, CartesianGrid, XAxis, YAxis, Legend, ResponsiveContainer } from 'recharts';
+
+
+
+interface malwareDetectionEntry {
+  date: string;
+  count: number;
+}
+interface scanConfidenceEntry {
+  index: number;
+  confidence: number;
+}
+interface modelUsageEntry {
+  model: string;
+  usage: number;
+}
+import { LineChart, Line, CartesianGrid, XAxis, YAxis, Legend, ResponsiveContainer, PieChart, BarChart, Bar, Pie, Rectangle, Tooltip, Cell } from 'recharts';
 import ScansTable from '../components/ScanTable';
-import { getSessionKey } from '../context/utils';
+import { getSessionKey, queryScanDB } from '../context/utils';
 
 
 export default function Analytics({ setPage }: { setPage: React.Dispatch<React.SetStateAction<PageType>> }) {
   const [drawerOpen, setDrawerOpen] = React.useState(false);
+  const [data, setData] = React.useState<any[]>([]);
+  const [malwareDetections, setMalwareDetections] = React.useState<any[]>([]);
+  const [scanConfidence, setScanConfidence] = React.useState<any[]>([]);
+  const [mostUsedModel, setMostUsedModel] = React.useState<any[]>([]);
   //if session key is invalid, redirect to login page
   if (DEBUG) {
     console.log('Rendering Dashboard component');
@@ -82,6 +61,72 @@ export default function Analytics({ setPage }: { setPage: React.Dispatch<React.S
       setPage('login');
     }
   }
+
+  const updateData = () => {
+    // Fetch new data and update state
+    queryScanDB({ "filter": 100 }).then((newData) => {
+      const maindata: any[] = newData;
+      //invert the data to have most recent last
+
+
+      const malwareDetectionsData: malwareDetectionEntry[] = [];
+      const scanConfidenceData: scanConfidenceEntry[] = [];
+      const mostUsedModelData: modelUsageEntry[] = [];
+      //process newData to fill in the above arrays
+
+
+      for (let i = 0; i < maindata.length; i++) {
+        const entry = maindata[i];
+        const date = entry.timestamp.split(',')[0]; // Extract date portion
+        if (entry.Result.Classification === 'MALWARE') {
+          const existingEntry = malwareDetectionsData.find((e) => e.date === date);
+          if (existingEntry) {
+            existingEntry.count += 1;
+          } else {
+            malwareDetectionsData.push({ date, count: 1 });
+          }
+        } else {
+          const existingEntry = malwareDetectionsData.find((e) => e.date === date);
+          if (!existingEntry) {
+            malwareDetectionsData.push({ date, count: 0 });
+          }
+        }
+      }
+      setMalwareDetections(malwareDetectionsData.reverse());
+      console.log('Analytics page - processed malware detections data:', malwareDetectionsData);
+      setData(maindata);
+      console.log('Analytics page - fetched scan data:', maindata);
+
+
+      for (let i = 0; i < maindata.length; i++) {
+        const entry = maindata[maindata.length - 1 - i];
+        scanConfidenceData.push({ index: i+1, confidence: entry.Result.Confidence });
+      }
+      setScanConfidence(scanConfidenceData);
+      console.log('Analytics page - processed scan confidence data:', scanConfidenceData);
+
+      //process most used model data
+      const modelUsageMap: { [key: string]: number } = {};
+      for (let i = 0; i < maindata.length; i++) {
+        const entry = maindata[i];
+        const model = entry.model_name;
+        if (model in modelUsageMap) {
+          modelUsageMap[model] += 1;
+        } else {
+          modelUsageMap[model] = 1;
+        }
+      }
+      for (const model in modelUsageMap) {
+        mostUsedModelData.push({ model, usage: modelUsageMap[model] });
+      }
+      setMostUsedModel(mostUsedModelData);
+      console.log('Analytics page - processed most used model data:', mostUsedModelData);
+    });
+
+  };
+  React.useEffect(() => {
+    updateData();
+  }, []);
 
 
   return (
@@ -138,14 +183,14 @@ export default function Analytics({ setPage }: { setPage: React.Dispatch<React.S
                 <AspectRatio ratio="16/9" color="neutral" sx={{ borderRadius: 0 }}>
                   <Box sx={{ width: '50%', height: '50%', display: 'flex', alignItems: 'center', mb: 2 }}>
                     <ResponsiveContainer width="90%" height="90%">
-                      <LineChart
-                        data={data}
-
+                      <BarChart
+                        data={malwareDetections}
                       >
-                        <CartesianGrid stroke="#aaa" strokeDasharray="5 5" />
-                        <Line type="monotone" dataKey="uv" stroke="purple" strokeWidth={2} name="My data series name" />
-                        <XAxis dataKey="name" />
-                      </LineChart>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="date" />
+                        <YAxis width="auto" dataKey="count" />
+                        <Bar dataKey="count" fill="#8884d8" activeBar={<Rectangle fill="pink" stroke="blue" />} />
+                      </BarChart>
                     </ResponsiveContainer>
                   </Box>
                 </AspectRatio>
@@ -167,40 +212,12 @@ export default function Analytics({ setPage }: { setPage: React.Dispatch<React.S
                   <Box sx={{ width: '50%', height: '50%', display: 'flex', alignItems: 'center', mb: 2 }}>
                     <ResponsiveContainer width="90%" height="90%">
                       <LineChart
-                        data={data}
+                        data={scanConfidence}
                       >
-                        <CartesianGrid stroke="#aaa" strokeDasharray="5 5" />
-                        <Line type="monotone" dataKey="uv" stroke="purple" strokeWidth={2} name="My data series name" />
-                        <XAxis dataKey="name" />
-                        <YAxis />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </Box>
-                </AspectRatio>
-              </Stack>
-            </Sheet>
-            <Sheet
-              variant="outlined"
-              sx={{
-                borderRadius: 'sm',
-                display: { xs: 'none', md: 'flex' },
-                width: '100%',
-              }}
-            >
-              <Stack justifyContent="space-between" sx={{ p: 1, width: '100%' }}>
-                <Typography level="title-md" sx={{ mt: 1, ml: 1, mb: 1 }}>
-                  Jobs
-                </Typography>
-                <AspectRatio ratio="16/9" color="neutral" sx={{ borderRadius: 0 }}>
-                  <Box sx={{ width: '50%', height: '50%', display: 'flex', alignItems: 'center', mb: 2 }}>
-                    <ResponsiveContainer width="90%" height="90%">
-                      <LineChart
-                        data={data}
-                      >
-                        <CartesianGrid stroke="#aaa" strokeDasharray="5 5" />
-                        <Line type="monotone" dataKey="uv" stroke="purple" strokeWidth={2} name="My data series name" />
-                        <XAxis dataKey="name" />
-                         <YAxis />
+                        <CartesianGrid stroke="#aaa" />
+                        <Line type="monotone" dataKey="confidence" stroke="purple" strokeWidth={2} label="Confidence" orientation={'vertcal'} />
+                        <XAxis dataKey="index" />
+                        <YAxis name="confidence" dataKey="confidence" width="auto" domain={['auto', 'auto']}/>
                       </LineChart>
                     </ResponsiveContainer>
                   </Box>
@@ -222,13 +239,18 @@ export default function Analytics({ setPage }: { setPage: React.Dispatch<React.S
                 <AspectRatio ratio="16/9" color="neutral" sx={{ borderRadius: 0 }}>
                   <Box sx={{ width: '50%', height: '50%', display: 'flex', alignItems: 'center', mb: 2 }}>
                     <ResponsiveContainer width="95%" height="95%">
-                      <LineChart
-                        data={data}
+                      <PieChart
+                        data={mostUsedModel}
+                        
                       >
-                        <CartesianGrid stroke="#aaa" strokeDasharray="5 5" />
-                        <Line type="monotone" dataKey="uv" stroke="purple" strokeWidth={2} name="My data series name" />
-                        <XAxis dataKey="name" />
-                      </LineChart>
+                        <Pie type='' dataKey="usage" nameKey="model">
+                          {mostUsedModel.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={['#8884d8', '#82ca9d', '#ffc658', '#ff8042', '#8dd1e1'][index % 5]} />
+                          ))}
+                        </Pie>
+                        <Legend />
+                        <Tooltip />
+                      </PieChart>
                     </ResponsiveContainer>
                   </Box>
                 </AspectRatio>
@@ -242,7 +264,7 @@ export default function Analytics({ setPage }: { setPage: React.Dispatch<React.S
                 display: { xs: 'none', md: 'flex' },
               }}
             >
-              <ScansTable />
+              <ScansTable data={data} />
             </Sheet>
             <Sheet
               variant="outlined"
@@ -250,6 +272,7 @@ export default function Analytics({ setPage }: { setPage: React.Dispatch<React.S
                 display: { xs: 'inherit', sm: 'none' },
                 borderRadius: 'sm',
                 overflow: 'auto',
+                maxHeight: '40vh',
                 backgroundColor: 'background.surface',
                 '& > *': {
                   '&:nth-child(n):not(:nth-last-child(-n+4))': {

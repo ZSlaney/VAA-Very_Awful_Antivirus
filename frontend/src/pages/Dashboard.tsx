@@ -14,12 +14,11 @@ import FindInPageIcon from '@mui/icons-material/FindInPage';
 
 import Layout from '../components/Layout';
 import Header from '../components/Header';
-import SideDrawer from '../components/Navigation';
 
 
 import { DEBUG, type PageType } from '../App';
 import JobsList from '../components/JobsTable';
-import { getSessionKey } from '../context/utils';
+import { fetchJobs, getSessionKey } from '../context/utils';
 import SmallTabBar from '../components/SmallTabBar';
 import { get_version_uptime } from '../context/utils';
 
@@ -30,6 +29,7 @@ export default function Dashboard({ setPage }: { setPage: React.Dispatch<React.S
     version: 'None',
     build: 'None',
   });
+  const [jobs, setJobs] = React.useState<any[]>([]);
 
   //if session key is invalid, redirect to login page
   if (DEBUG) {
@@ -39,29 +39,30 @@ export default function Dashboard({ setPage }: { setPage: React.Dispatch<React.S
     const sessionKey = getSessionKey();
     const isValidSession = sessionKey !== null && sessionKey !== undefined && sessionKey !== '';
     if (!isValidSession) {
-
+      console.log('Invalid session key, redirecting to login page');
       setPage('login');
     }
   }
-  const updateSystemStats = () => {
-    const systemStats = get_version_uptime()
+  const update = () => {
+    get_version_uptime()
         .then((data) => {
-          let uptime = data.uptime.split(':');
-          uptime[2] = parseFloat(parseFloat(uptime[2]).toFixed(2)).toString();//remove all but 2 decimal places from seconds
-          const formattedUptime = `${uptime[0]}h ${uptime[1]}m ${uptime[2]}s`;
-          data.uptime = formattedUptime;
           setSystemStats({
             systemUptime: data.uptime,
             version: data.Version,
             build: data["VAA Build"],
           });
-        });
+        }).then(() => {
+          fetchJobs().then((data) => {
+            //set jobs state
+            setJobs(data);
+          });
+        }); 
   }
   React.useEffect(() => {
-    updateSystemStats();
+    update();
     const int = setInterval(() => {
       //refreh dash data every 10 seconds
-      updateSystemStats();
+      update();
     }, 10000);
     return () => {
       clearInterval(int);
@@ -70,9 +71,9 @@ export default function Dashboard({ setPage }: { setPage: React.Dispatch<React.S
   return (
     <CssVarsProvider disableTransitionOnChange>
       <CssBaseline />
-      {drawerOpen && (
+      { drawerOpen && (
         <Layout.SideDrawer onClose={() => setDrawerOpen(false)}>
-          <SideDrawer />
+          
         </Layout.SideDrawer>
       )}
       <SmallTabBar />
@@ -95,8 +96,9 @@ export default function Dashboard({ setPage }: { setPage: React.Dispatch<React.S
           <Header setPage={setPage} />
         </Layout.Header>
         <Layout.SideNav>
-          <SideDrawer />
-        </Layout.SideNav>
+          
+        </Layout.SideNav> 
+        
         <Layout.Main>
           <Box
             sx={{
@@ -126,7 +128,7 @@ export default function Dashboard({ setPage }: { setPage: React.Dispatch<React.S
                   <Typography level="body-sm" sx={{ color: 'text.secondary' }}>
                     AI Core System
                   </Typography>
-                  <Typography level="title-lg" >Idle</Typography>
+                  <Typography level="title-lg" >{jobs.length > 0 ? 'Active' : 'Idle'}</Typography>
                 </Grid>
                 <Grid xs={12} sm={3}>
                   <Typography level="body-sm" sx={{ color: 'text.secondary' }}>
@@ -159,22 +161,28 @@ export default function Dashboard({ setPage }: { setPage: React.Dispatch<React.S
             >
               <Grid container spacing={2} sx={{ p: 2, flexGrow: 1 }}>
                 <Grid xs={4} sm={4}>
-                  <Typography level="body-sm" sx={{ color: 'text.secondary' }}>
+                   <Typography level="body-sm" sx={{ color: 'text.secondary' }}>
                     System Uptime
                   </Typography>
-                  <Typography level="title-lg" color='success'>{systemStats.systemUptime}</Typography>
+                  <Typography level="title-lg">{systemStats.systemUptime}</Typography>
                 </Grid>
                 <Grid xs={4} sm={4}>
                   <Typography level="body-sm" sx={{ color: 'text.secondary' }}>
                     AI Core System
                   </Typography>
-                  <Typography level="title-lg">Idle</Typography>
+                  <Typography level="title-lg" >{jobs.length > 0 ? 'Active' : 'Idle'}</Typography>
                 </Grid>
                 <Grid xs={4} sm={4}>
                   <Typography level="body-sm" sx={{ color: 'text.secondary' }}>
-                    Alerts
+                    Web Version
                   </Typography>
-                  <Typography level="title-lg" color='success'>None</Typography>
+                  <Typography level="title-lg">{systemStats.version}</Typography>
+                </Grid>
+                <Grid xs={4} sm={4}>
+                  <Typography level="body-sm" sx={{ color: 'text.secondary' }}>
+                    VAA Build
+                  </Typography>
+                  <Typography level="title-lg">{systemStats.build}</Typography>
                 </Grid>
               </Grid>
             </Sheet>
@@ -199,50 +207,7 @@ export default function Dashboard({ setPage }: { setPage: React.Dispatch<React.S
 
               <Typography level="body-xs">Scan Individual File for Malware</Typography>
             </Card>
-            <Card variant="outlined" size="sm">
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Box sx={{ flex: 1 }}>
-                  <Typography level="title-md">Recent Detections</Typography>
-
-                </Box>
-              </Box>
-              <CardOverflow
-                sx={{
-                  borderBottom: '1px solid',
-                  borderTop: '1px solid',
-                  borderColor: 'neutral.outlinedBorder',
-                }}
-              >
-                <AspectRatio ratio="16/9" color="neutral" sx={{ borderRadius: 0 }}>
-                  <CircularProgress determinate value={75} size="lg" thickness={8} />
-
-                </AspectRatio>
-
-              </CardOverflow>
-              <Typography level="body-xs">Scan Individual File for Malware</Typography>
-            </Card>
-            <Card variant="outlined" size="sm">
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Box sx={{ flex: 1 }}>
-                  <Typography level="title-md">Alerts</Typography>
-
-                </Box>
-              </Box>
-              <CardOverflow
-                sx={{
-                  borderBottom: '1px solid',
-                  borderTop: '1px solid',
-                  borderColor: 'neutral.outlinedBorder',
-                }}
-              >
-                <AspectRatio ratio="16/9" color="neutral" sx={{ borderRadius: 0 }}>
-                  <CircularProgress size="lg" thickness={8} />
-
-                </AspectRatio>
-
-              </CardOverflow>
-              <Typography level="body-xs">Scan Individual File for Malware</Typography>
-            </Card>
+            {jobs.length > 0 && 
             <Sheet
               variant="outlined"
               sx={{
@@ -253,9 +218,10 @@ export default function Dashboard({ setPage }: { setPage: React.Dispatch<React.S
             >
               <Stack justifyContent="space-between" sx={{ p: 2, flexGrow: 1 }}>
                 <Typography level="title-lg">Active Jobs</Typography>
-                <JobsList setPage={setPage} />
+                <JobsList setPage={setPage} jobs={jobs} />
               </Stack>
             </Sheet>
+            }
 
 
           </Box>

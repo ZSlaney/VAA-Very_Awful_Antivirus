@@ -19,10 +19,18 @@ export function getUser(): { sessionKey: string; perm_level: string; username: s
   const sessionKey = getSessionKey();
   const perm_level = getPermLevel();
   const username = sessionStorage.getItem('vaa-username');
+  console.log(`getUser: sessionKey=${sessionKey}, perm_level=${perm_level}, username=${username}`);
   if (sessionKey && perm_level && username) {
     return { sessionKey, perm_level, username };
   }
   return null;
+}
+export function setUser(username: string | null): void {
+  if (username) {
+    sessionStorage.setItem('vaa-username', username);
+  } else {
+    sessionStorage.removeItem('vaa-username');
+  }
 }
 
 
@@ -49,8 +57,9 @@ export function issueAuth(username: string, password: string): Promise<string> {
       return response.json();
     })
     .then((data) => {
+      console.log('Authentication response data:', data);
       if (data.Key && data.Key !== 'NONE') {
-        setPermLevel(data.Permission_Level);
+        setPermLevel(data.Permission_Level.toString());
         setSessionKey(data.Key);
         return data.Key;
       }
@@ -70,39 +79,67 @@ export function clearAuth(): void {
 export function fetchJobDetails(job_id: number): Promise<any> {
   const sessionKey = getSessionKey();
   const perm_level = getPermLevel();
-  return fetch('/api/scan/result', {
+  return fetch('/api/scan/result/single', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({ job_id, key: sessionKey, perm_level}),
   })
-    .then((response) => {
+    .then(async(response) => {
       if (!response.ok) {
         throw new Error('Job search failed');
       }
 
-      const result = response.json();
+      const result = await response.json();
+      if (result.status == "No job for you by that ID"){
+        //kill the current job 
+        setCurrentJob(null);
+        return null;
+      }
       return result;
     });
 }
 
-export function queryScanDB(filter: JSON): Promise<any> {
+
+export function fetchJobs(): Promise<any> {
   const sessionKey = getSessionKey();
   const perm_level = getPermLevel();
-  return fetch('/api/scan/result', {
+  return fetch('/api/scan/result/all', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ key: sessionKey, perm_level}),
+  })
+    .then(async(response) => {
+      if (!response.ok) {
+        throw new Error('Job search failed');
+      }
+
+      const result = await response.json();
+      console.log('Fetched jobs:', result);
+      return result;
+    });
+}
+
+export function queryScanDB(filter: any): Promise<any> {
+  const sessionKey = getSessionKey();
+  const perm_level = getPermLevel();
+  return fetch('/api/scan/find', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({ filter, key: sessionKey, perm_level}),
   })
-    .then((response) => {
+    .then(async (response) => {
       if (!response.ok) {
         throw new Error('Scan DB search failed');
       }
       
-      const result = response.json();
+      const result = await response.json();
+      console.log('Fetched scan DB results:', result);
       return result;
     });
 }
@@ -139,11 +176,13 @@ export function setCurrentJob(jobnumber: string | null): void {
   }
 }
 
-export function uploadFile(file: File, perm_level: string | null): Promise<any> {
+export function uploadFile(file: File, model_name: string): Promise<any> {
   const sessionKey = getSessionKey();
+  const perm_level = getPermLevel();
   const formData = new FormData();
   formData.append('key', sessionKey ? sessionKey : 'sdsd');
   formData.append('perm_level', perm_level ? perm_level : 'adasdad');
+  formData.append('model_name', model_name);
   formData.append('file', file);
   console.log('Uploading file with session key:', formData);
   return fetch('/api/scan/add', {
