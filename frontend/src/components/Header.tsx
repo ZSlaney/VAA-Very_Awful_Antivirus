@@ -28,6 +28,7 @@ import Navigation from './Navigation';
 import { clearAuth, getUser } from '../context/utils';
 import { DEBUG, type PageType } from '../App';
 import UsersModal from './UsersModal';
+import Minilogo from '../../public/VA-AVMini.png';
 
 function ColorSchemeToggle() {
   const { mode, setMode } = useColorScheme();
@@ -199,8 +200,8 @@ export default function Header({setPage}: {setPage: React.Dispatch<React.SetStat
             sx={{ maxWidth: '32px', maxHeight: '32px', borderRadius: '9999999px' }}
           >
             <Avatar
-              src="https://i.pravatar.cc/40?img=2"
-              srcSet="https://i.pravatar.cc/80?img=2"
+              src={Minilogo}
+              srcSet={Minilogo}
               sx={{ maxWidth: '32px', maxHeight: '32px' }}
             />
           </MenuButton>
@@ -217,8 +218,8 @@ export default function Header({setPage}: {setPage: React.Dispatch<React.SetStat
             <MenuItem>
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 <Avatar
-                  src="https://i.pravatar.cc/40?img=2"
-                  srcSet="https://i.pravatar.cc/80?img=2"
+                  src={Minilogo}
+                  srcSet={Minilogo}
                   sx={{ borderRadius: '50%' }}
                 />
                 <Box sx={{ ml: 1.5 }}>
@@ -232,7 +233,7 @@ export default function Header({setPage}: {setPage: React.Dispatch<React.SetStat
               </Box>
             </MenuItem>
             <ListDivider />
-            <MenuItem onClick={() => setPage('help')} disabled>
+            <MenuItem onClick={() => setPage('help')}>
               <HelpRoundedIcon />
               Help
             </MenuItem>
