@@ -180,7 +180,7 @@ export default function ScanTool({ setPage }: { setPage: React.Dispatch<React.Se
           <SideDrawer />
         </Layout.SideDrawer>
       )}
-      <SmallTabBar />
+      <SmallTabBar setPage={setPage} />
       <Layout.Root
         sx={[
           {

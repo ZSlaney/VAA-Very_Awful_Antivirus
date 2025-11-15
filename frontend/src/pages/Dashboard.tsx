@@ -76,7 +76,7 @@ export default function Dashboard({ setPage }: { setPage: React.Dispatch<React.S
           
         </Layout.SideDrawer>
       )}
-      <SmallTabBar />
+      <SmallTabBar setPage={setPage} />
       <Layout.Root
         sx={[
           {

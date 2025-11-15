@@ -1,13 +1,12 @@
 import Stack from '@mui/joy/Stack';
 import Button from '@mui/joy/Button';
-import EmailRoundedIcon from '@mui/icons-material/EmailRounded';
-import PeopleAltRoundedIcon from '@mui/icons-material/PeopleAltRounded';
-import FolderRoundedIcon from '@mui/icons-material/FolderRounded';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import AnalyticsIcon from '@mui/icons-material/Analytics';
+import PolicyIcon from '@mui/icons-material/Policy';
+import InfoIcon from '@mui/icons-material/Info';
+import type { PageType } from '../App';
 
-
-
-
-export default function SmallTabBar() {
+export default function SmallTabBar({setPage}: {setPage: React.Dispatch<React.SetStateAction<PageType>>}) {
     return (
         <Stack
         id="tab-bar"
@@ -30,9 +29,9 @@ export default function SmallTabBar() {
           variant="plain"
           color="neutral"
           component="a"
-          href="/joy-ui/getting-started/templates/email/"
+          onClick={() => setPage('dashboard')}
           size="sm"
-          startDecorator={<EmailRoundedIcon />}
+          startDecorator={<DashboardIcon />}
           sx={{ flexDirection: 'column', '--Button-gap': 0 }}
         >
           Dashboard
@@ -41,9 +40,9 @@ export default function SmallTabBar() {
           variant="plain"
           color="neutral"
           component="a"
-          href="/joy-ui/getting-started/templates/team/"
+          onClick={() => setPage('analytics')}
           size="sm"
-          startDecorator={<PeopleAltRoundedIcon />}
+          startDecorator={<AnalyticsIcon />}
           sx={{ flexDirection: 'column', '--Button-gap': 0 }}
         >
           Analytics
@@ -51,14 +50,25 @@ export default function SmallTabBar() {
         <Button
           variant="plain"
           color="neutral"
-          aria-pressed="true"
           component="a"
-          href="/joy-ui/getting-started/templates/files/"
+          onClick={() => setPage('scantool')}
           size="sm"
-          startDecorator={<FolderRoundedIcon />}
+          startDecorator={<PolicyIcon />}
           sx={{ flexDirection: 'column', '--Button-gap': 0 }}
         >
-          Settings
+          Scan Tool
+        </Button>
+         <Button
+          variant="plain"
+          color="neutral"
+          
+          component="a"
+          onClick={() => setPage('about')}
+          size="sm"
+          startDecorator={<InfoIcon />}
+          sx={{ flexDirection: 'column', '--Button-gap': 0 }}
+        >
+          About Us
         </Button>
       </Stack>
     )

@@ -25,7 +25,7 @@ export default function Help({setPage}: {setPage: React.Dispatch<React.SetStateA
           <SideDrawer />
         </Layout.SideDrawer>
       )}
-      <SmallTabBar />
+      <SmallTabBar setPage={setPage} />
       <Layout.Root
         sx={[
           {

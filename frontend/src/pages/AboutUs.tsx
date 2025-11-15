@@ -26,7 +26,7 @@ export default function AboutUs({setPage}: {setPage: React.Dispatch<React.SetSta
           <SideDrawer />
         </Layout.SideDrawer>
       )}
-      <SmallTabBar />
+      <SmallTabBar setPage={setPage} />
       <Layout.Root
         sx={[
           {

@@ -100,7 +100,7 @@ export default function Analytics({ setPage }: { setPage: React.Dispatch<React.S
 
       for (let i = 0; i < maindata.length; i++) {
         const entry = maindata[maindata.length - 1 - i];
-        scanConfidenceData.push({ index: i+1, confidence: entry.Result.Confidence });
+        scanConfidenceData.push({ index: i + 1, confidence: entry.Result.Confidence });
       }
       setScanConfidence(scanConfidenceData);
       console.log('Analytics page - processed scan confidence data:', scanConfidenceData);
@@ -137,7 +137,7 @@ export default function Analytics({ setPage }: { setPage: React.Dispatch<React.S
           <Navigation />
         </Layout.SideDrawer>
       )}
-      <SmallTabBar />
+      <SmallTabBar setPage={setPage} />
       <Layout.Root
         sx={[
           {
@@ -217,7 +217,7 @@ export default function Analytics({ setPage }: { setPage: React.Dispatch<React.S
                         <CartesianGrid stroke="#aaa" />
                         <Line type="monotone" dataKey="confidence" stroke="purple" strokeWidth={2} label="Confidence" orientation={'vertcal'} />
                         <XAxis dataKey="index" />
-                        <YAxis name="confidence" dataKey="confidence" width="auto" domain={['auto', 'auto']}/>
+                        <YAxis name="confidence" dataKey="confidence" width="auto" domain={['auto', 'auto']} />
                       </LineChart>
                     </ResponsiveContainer>
                   </Box>
@@ -241,7 +241,7 @@ export default function Analytics({ setPage }: { setPage: React.Dispatch<React.S
                     <ResponsiveContainer width="95%" height="95%">
                       <PieChart
                         data={mostUsedModel}
-                        
+
                       >
                         <Pie type='' dataKey="usage" nameKey="model">
                           {mostUsedModel.map((entry, index) => (
@@ -269,6 +269,94 @@ export default function Analytics({ setPage }: { setPage: React.Dispatch<React.S
             <Sheet
               variant="outlined"
               sx={{
+                borderRadius: 'sm',
+                display: { xs: 'flex', md: 'none' },
+                width: '100%',
+              }}
+            >
+              <Stack justifyContent="space-between" sx={{ p: 2, width: '100%' }}>
+                <Typography level="title-md">
+                  Malware Detections
+                </Typography>
+                <AspectRatio ratio="16/9" color="neutral" sx={{ borderRadius: 0 }}>
+                  <Box sx={{ width: '50%', height: '50%', display: 'flex', alignItems: 'center', mb: 2 }}>
+                    <ResponsiveContainer width="90%" height="90%">
+                      <BarChart
+                        data={malwareDetections}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="date" />
+                        <YAxis width="auto" dataKey="count" />
+                        <Bar dataKey="count" fill="#8884d8" activeBar={<Rectangle fill="pink" stroke="blue" />} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </Box>
+                </AspectRatio>
+              </Stack>
+            </Sheet>
+            <Sheet
+              variant="outlined"
+              sx={{
+                borderRadius: 'sm',
+                display: { xs: 'flex', md: 'none' },
+                width: '100%',
+              }}
+            >
+              <Stack justifyContent="space-between" sx={{ p: 2, width: '100%' }}>
+                <Typography level="title-md">
+                  Scan Confidence
+                </Typography>
+                <AspectRatio ratio="16/9" color="neutral" sx={{ borderRadius: 0 }}>
+                  <Box sx={{ width: '50%', height: '50%', display: 'flex', alignItems: 'center', mb: 2 }}>
+                    <ResponsiveContainer width="90%" height="90%">
+                      <LineChart
+                        data={scanConfidence}
+                      >
+                        <CartesianGrid stroke="#aaa" />
+                        <Line type="monotone" dataKey="confidence" stroke="purple" strokeWidth={2} label="Confidence" orientation={'vertcal'} />
+                        <XAxis dataKey="index" />
+                        <YAxis name="confidence" dataKey="confidence" width="auto" domain={['auto', 'auto']} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </Box>
+                </AspectRatio>
+              </Stack>
+            </Sheet>
+            <Sheet
+              variant="outlined"
+              sx={{
+                borderRadius: 'sm',
+                display: { xs: 'flex', md: 'none' },
+                width: '100%',
+              }}
+            >
+              <Stack justifyContent="space-between" sx={{ p: 1, width: '100%' }}>
+                <Typography level="title-md" sx={{ mt: 1, ml: 1, mb: 1 }}>
+                  Most Used Model
+                </Typography>
+                <AspectRatio ratio="16/9" color="neutral" sx={{ borderRadius: 0 }}>
+                  <Box sx={{ width: '50%', height: '50%', display: 'flex', alignItems: 'center', mb: 2 }}>
+                    <ResponsiveContainer width="95%" height="95%">
+                      <PieChart
+                        data={mostUsedModel}
+
+                      >
+                        <Pie type='' dataKey="usage" nameKey="model">
+                          {mostUsedModel.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={['#8884d8', '#82ca9d', '#ffc658', '#ff8042', '#8dd1e1'][index % 5]} />
+                          ))}
+                        </Pie>
+                        <Legend />
+                        <Tooltip />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </Box>
+                </AspectRatio>
+              </Stack>
+            </Sheet>
+            <Sheet
+              variant="outlined"
+              sx={{
                 display: { xs: 'inherit', sm: 'none' },
                 borderRadius: 'sm',
                 overflow: 'auto',
@@ -280,9 +368,10 @@ export default function Analytics({ setPage }: { setPage: React.Dispatch<React.S
                     borderColor: 'divider',
                   },
                 },
+                mb: 6, // add margin bottom to avoid overlap with tab bar
               }}
             >
-              <JobsList />
+              <ScansTable data={data} mode="sm" />
             </Sheet>
           </Box>
         </Layout.Main>
