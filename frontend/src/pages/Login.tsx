@@ -6,7 +6,6 @@ import Box from '@mui/joy/Box';
 import Button from '@mui/joy/Button';
 import Divider from '@mui/joy/Divider';
 import FormLabel from '@mui/joy/FormLabel';
-import IconButton from '@mui/joy/IconButton';
 import Input from '@mui/joy/Input';
 import Typography from '@mui/joy/Typography';
 import Stack from '@mui/joy/Stack';
@@ -20,12 +19,6 @@ import ModalClose from '@mui/joy/ModalClose';
 import { issueAuth, setUser } from '../context/utils';
 import { DEBUG, type PageType } from '../App';
 
-<<<<<<< HEAD
-interface FormElements extends HTMLFormControlsCollection {
-  email: HTMLInputElement;
-  password: HTMLInputElement;
-  persistent: HTMLInputElement;
-}
 
 function AboutUsModal({
   open,
@@ -68,7 +61,7 @@ function AboutUsModal({
 
           <Typography level="body-sm">
           Questions, concerns or clarifications can be addressed to: <strong>Zach Slaney</strong> -{' '}
-          <Link underline="always" href="mailto:103612275@student.swin.edu.au">103612275@student.swin.edu.au</Link>
+          <a href="mailto:103612275@student.swin.edu.au">103612275@student.swin.edu.au/</a>
           </Typography>
         </Stack>
       </ModalDialog>
@@ -77,18 +70,13 @@ function AboutUsModal({
 }
 
 
-=======
->>>>>>> d48c0b0c7e8fdb7c20adbe71b9f87a6ae0d09018
 const customTheme = extendTheme({});
 
 export default function Login({ setPage }: { setPage: React.Dispatch<React.SetStateAction<PageType>> }) {
   const [loading, setLoading] = React.useState(false);
-<<<<<<< HEAD
   const [aboutOpen, setAboutOpen] = React.useState(false);
-  const WALLPAPER_URL = '/steve-johnson-hokONTrHIAQ-unsplash.jpg';
-=======
   const [error, setError] = React.useState<boolean>(false);
->>>>>>> d48c0b0c7e8fdb7c20adbe71b9f87a6ae0d09018
+  const WALLPAPER_URL = '/steve-johnson-hokONTrHIAQ-unsplash.jpg';
 
   ///scott-rodgerson-PSpf_XgOM5w-unsplash
   ///steve-johnson-hokONTrHIAQ-unsplash.jpg
