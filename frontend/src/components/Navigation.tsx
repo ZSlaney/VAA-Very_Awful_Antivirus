@@ -24,7 +24,7 @@ export default function SideDrawer() {
             sx={{ '& .JoyListItemButton-root': { p: '8px' } }}
           >
             <ListItem>
-              <ListItemButton onClick={() =>setOpen(true)}>
+              <ListItemButton onClick={() =>setOpen(true)} disabled>
                 <ListItemDecorator>
                   <EventNoteIcon fontSize="small" />
                 </ListItemDecorator>
