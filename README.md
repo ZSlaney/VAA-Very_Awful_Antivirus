@@ -16,8 +16,8 @@ To run the app, ensure python is installed
 python --version == 3.14.0
 ```
 
-If installing globally is your style, disregard the following
-Create a venv for python packages
+If installing globally is your style, disregard the following.
+(Create a venv for python packages)
 ```bash
 python -m venv .venv
 ```
@@ -36,8 +36,6 @@ cd ./frontend
 npm i
 npx vite build
 ```
-
-
 
 ## Running the application
 

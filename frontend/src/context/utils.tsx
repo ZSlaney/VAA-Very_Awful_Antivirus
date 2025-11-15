@@ -68,7 +68,7 @@ export function issueAuth(username: string, password: string): Promise<string> {
       }
     });
 }
-export function newUser(username: string, password: string): Promise<string> {
+export function newUser(username: string, password: string): Promise<{response: string} > {
   return fetch('/api/auth/new', {
     method: "POST",
     headers: {
@@ -84,7 +84,7 @@ export function newUser(username: string, password: string): Promise<string> {
     })
   .then((data) => {
       console.log('Authentication response data:', data);
-      return data.result
+      return data
     });
 }
 

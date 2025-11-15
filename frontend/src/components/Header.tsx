@@ -232,7 +232,7 @@ export default function Header({setPage}: {setPage: React.Dispatch<React.SetStat
               </Box>
             </MenuItem>
             <ListDivider />
-            <MenuItem onClick={() => setPage('help')}>
+            <MenuItem onClick={() => setPage('help')} disabled>
               <HelpRoundedIcon />
               Help
             </MenuItem>

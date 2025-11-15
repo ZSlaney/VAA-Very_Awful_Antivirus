@@ -16,73 +16,11 @@ import ModalClose from '@mui/joy/ModalClose';
 
 
 
-import { issueAuth, setUser, newUser} from '../context/utils';
+import { issueAuth, setUser} from '../context/utils';
 import { DEBUG, type PageType } from '../App';
+import { Link } from '@mui/joy';
 
-function NewUser({open, setOpen}: 
-{open: boolean; setOpen: React.Dispatch<React.SetStateAction<boolean>> }) {
-  const [error, setError] = React.useState<boolean>(false);
-  
-  const handleNewUser = async (username: string, password: string) => {
-    try {
-      if (DEBUG) {
-        console.log(`Attempting login with username: ${username} and password: ${password}`);
-        if (username == null || password == null) {
-          console.error('Username or password is null');
-          return;
-        }
-      } else {
-        const result = await newUser(username, password);
-        if (result) {
-          if (result != "Success") {
-            setError
-          }
-        } else {
-          setError
-        }
-      }
 
-    } catch (error) {
-      console.error('New User failed:', error);
-    }
-  };
-return (
-<Modal open={open} onClose={() => setOpen(false)}>
-      <ModalDialog size="lg" aria-labelledby="sign-up"
-      sx={{
-        maxHeight: '80vh',
-        overflowY: 'auto',
-      }}>
-        <ModalClose  aria-label="Sign Up" />
-        <Stack spacing={1}>
-          <Typography id="sign-up" level="title-lg">
-            Sign Up
-          </Typography>
-          <Divider />
-          <form onSubmit={(event) => {
-                event.preventDefault();
-                const formData = new FormData(event.currentTarget);
-                const formJson = Object.fromEntries((formData as any).entries());
-                console.log("Form submitted with data:", formJson);
-                const username = formJson.username as string;
-                const password = formJson.password as string;
-                handleNewUser(username, password);
-              }} >
-                <FormLabel>Username</FormLabel>
-                <Input required type="username" name="username" />
-                <FormLabel>Password</FormLabel>
-                <Input required type="password" name="password" />
-                <Stack sx={{ gap: 4, mt: 2 }}>
-                  <Button type="submit" color={error ? 'danger' : "primary"}>
-                    Submit
-                  </Button>
-                </Stack>
-              </form>
-        </Stack>
-      </ModalDialog>
-    </Modal>
-  );
-}
 
 
 function AboutUsModal({
@@ -140,7 +78,6 @@ const customTheme = extendTheme({});
 export default function Login({ setPage }: { setPage: React.Dispatch<React.SetStateAction<PageType>> }) {
   const [loading, setLoading] = React.useState(false);
   const [aboutOpen, setAboutOpen] = React.useState(false);
-  const [newUserOpen, setNewUserOpen] = React.useState(false);
   const [error, setError] = React.useState<boolean>(false);
   const WALLPAPER_URL = '/steve-johnson-hokONTrHIAQ-unsplash.jpg';
 
@@ -319,13 +256,9 @@ export default function Login({ setPage }: { setPage: React.Dispatch<React.SetSt
                   <Button type="submit" color={error ? 'danger' : "primary"} fullWidth loading={loading}>
                     Sign in
                   </Button>
-
-                  <Button size="sm" variant="plain" onClick={() => setNewUserOpen(true)}>
-                    Sign Up!
-                  </Button>
-                  <Button size="sm" variant="plain" onClick={() => setAboutOpen(true)}>
+                  <Link onClick={() => setAboutOpen(true)}>
                     About us & Privacy
-                  </Button>
+                  </Link>
                 </Stack>
               </form>
             </Stack>
@@ -340,7 +273,6 @@ export default function Login({ setPage }: { setPage: React.Dispatch<React.SetSt
     </Box>
 
       <AboutUsModal open={aboutOpen} setOpen={setAboutOpen} />
-      <NewUser open={newUserOpen} setOpen={setNewUserOpen} />
     </CssVarsProvider >
   );
 }
