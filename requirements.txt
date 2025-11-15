@@ -13,6 +13,7 @@ pycryptodome==3.23.0
 pydantic==2.12.3
 pydantic_core==2.41.4
 python-dateutil==2.9.0.post0
+python-multipart==0.0.20
 pytz==2025.2
 scikit-learn==1.7.2
 scipy==1.16.2
