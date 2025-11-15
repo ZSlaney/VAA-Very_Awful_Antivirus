@@ -128,6 +128,9 @@ class VaaGovernor:
         with self.locks["scan"]:
             job_id = self.scanner.add_job(filename=file.filename, model_name=model_name, key=key)
         
+        if os.path.isdir(TMP_FOLDER) == False:
+            os.mkdir(TMP_FOLDER)
+            
         path = Path(TMP_FOLDER + str(key) + "/" + file.filename)
         
         if os.path.isdir(TMP_FOLDER + str(key) + "/") == False:

@@ -45,6 +45,12 @@ python run.py
 ```
 Then connect to the web portal at https://localhost:8000.  
 
+### Recreating the joblibs
+
+In Model_Generation, run the respective python file, the joblib will be in /Model_Generation/joblibs  
+
+They should be moved into /backend/Model/\*name of model\* to be used by the main application
+
 
 
 ## Need to Knows

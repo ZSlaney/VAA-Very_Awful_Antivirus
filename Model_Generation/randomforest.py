@@ -4,6 +4,9 @@ from sklearn.metrics import confusion_matrix, classification_report
 from sklearn.ensemble import RandomForestClassifier
 import pandas as pd
 import joblib
+import os
+
+JOBLIBS_FOLDER = os.path.dirname(os.path.abspath(__file__)) + "/joblibs"
 
 # Load the dataset
 csv_path = "./Model_Generation/Data/Base_Dataset.csv"
@@ -50,4 +53,7 @@ cm = confusion_matrix(y_test, y_pred)
 print("Confusion Matrix:")
 print(cm)
 
+if os.path.isdir(JOBLIBS_FOLDER) == False:
+    #Create folder
+    os.mkdir(JOBLIBS_FOLDER)
 joblib.dump(rf, './Model_Generation/joblibs/random_forest.joblib')
