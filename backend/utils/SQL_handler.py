@@ -38,8 +38,6 @@ def check_existing_username(username):
     u_cursor = users.cursor()
     
     # Create a table
-    u_cursor.execute(''' SELECT name FROM sqlite_master WHERE type='table' AND name='{users}' ''')
-    exists = u_cursor.fetchall()
     u_cursor.execute('''
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY,
@@ -51,7 +49,7 @@ def check_existing_username(username):
     ''')
     users.commit()
 
-    u_cursor.execute('''SELECT salt, pword, perm_level FROM users WHERE username=(?)''', (username,))
+    u_cursor.execute('''SELECT id FROM users WHERE username=(?)''', (username,))
     rows = u_cursor.fetchall()
     if rows != []:
         print("username taken")
@@ -79,14 +77,14 @@ def newUser(Username, Password, Permission_Level):
         return False
 
     salt = hash.gen_salt()
-    hash = hash.gen_hash(Password, salt)
+    user_hash = hash.gen_hash(Password, salt)
 
     if (Permission_Level < 0):
         Permission_Level = 0
     elif (Permission_Level > 20):
         Permission_Level = 20
 
-    u_cursor.execute("INSERT INTO users (username, salt, pword, perm_level) VALUES (?, ?, ?, ?)", (Username, salt, hash, Permission_Level))
+    u_cursor.execute("INSERT INTO users (username, salt, pword, perm_level) VALUES (?, ?, ?, ?)", (Username, salt, user_hash, Permission_Level))
 
 
     # Close the connection
