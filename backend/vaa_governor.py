@@ -1,6 +1,5 @@
 #Main program for VAA - VeryAwfulAntivirus no cli but houses a fastapi webserver and imports db functions to support
 
-import socket
 import uvicorn # ASGI server for FastAPI
 import os
 from backend.backend import app
@@ -43,25 +42,17 @@ class VaaGovernor:
         #self.traythread.start()
         self.api_thread.start()
         self.logger.info("Web server started in a separate thread.")
-        self.init_clisocket()
         
         self.logger.info("Starting cleaner thread.")
         self.cleanse_thread = threading.Thread(target=self.cleanse_clients_and_jobs)
         self.cleanse_thread.start()
 
-        self.main_loop()
-
-
-    def init_clisocket(self):
-        self.serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.serversocket.bind(('localhost', 7986)) # for cli clients
-        self.serversocket.listen(5)  # Listen for incoming connections
-    
-    def main_loop(self):
-        self.logger.info("VAA Governor is running and listening for connections...")
         while True:
-            clientsocket, address = self.serversocket.accept()
-            self.logger.info(f"Connection from {address} has been established!")
+            time.sleep(10)
+            #Keep main thread alive
+
+
+   
 
     def list_clients(self):
         return self.clients
